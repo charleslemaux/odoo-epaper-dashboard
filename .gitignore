@@ -1,0 +1,10 @@
+# Credentials — never commit
+include/config.h
+
+# Build output
+build/
+
+# Session/tooling artifacts
+.remember/
+*.pyc
+__pycache__/
