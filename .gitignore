@@ -3,6 +3,7 @@ include/config.h
 
 # Build output
 build/
+tests/*.exe
 
 # Session/tooling artifacts
 .remember/

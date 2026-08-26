@@ -9,11 +9,14 @@ CC ?= gcc
 CFLAGS = -Wall -Wextra -Werror -std=gnu11 -Itest_config -I../include \
 	-I../lib/jsmn -I../lib/font8x8
 
-TESTS = test_harness
+TESTS = test_harness test_json_str
 
 all: $(addsuffix .exe,$(TESTS))
 
 test_harness.exe: test_harness.c
+	$(CC) $(CFLAGS) -o $@ $^
+
+test_json_str.exe: test_json_str.c ../src/json_str.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 run: all
