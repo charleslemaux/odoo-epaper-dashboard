@@ -35,13 +35,6 @@
 
   `tests/Makefile` uses the `##` comment variant of the same header.
 - **No dynamic allocation in project code.** Large/persistent buffers are `static` locals. mbedTLS allocates internally — that's allowed.
-- **All commits** end with the trailer block:
-
-```
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01MQpLwQSn1NZPF3fegmoqzY
-```
-
 - **Build gates:** host-testable modules must pass `make -C tests run` (gcc, `-Wall -Wextra -Werror`); firmware tasks must produce `build/epaper_dashboard.uf2` via `cmake --build build`. Firmware compiles with `-Wall -Wextra` (no `-Werror` — SDK sources compile inside our target).
 - **Hardware checkpoints** are marked `[HW]`: build the .uf2, then ask the user to flash (BOOTSEL drag-drop) and paste serial output. Do NOT block later software tasks on `[HW]` confirmation — continue and batch hardware validation at Task 19.
 - **Environment facts** (verified 2026-08-26): Windows 11; `winget` and `python` (3.13) available; `cmake`, `ninja`, `arm-none-eabi-gcc`, `gcc`, `make` all missing; no pico-sdk anywhere. `winget`/env-var commands run in PowerShell; git/curl/build commands work in Bash. After `[Environment]::SetEnvironmentVariable(...,'User')`, also set the variable in the current session (`$env:X = ...`) — new values don't apply retroactively.
