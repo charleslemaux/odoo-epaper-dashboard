@@ -1,0 +1,35 @@
+/*
+** EPITECH PROJECT, 2026
+** epaper_dashboard
+** File description:
+** Configuration template: copy to include/config.h and fill in real values
+*/
+
+#ifndef CONFIG_H_
+    #define CONFIG_H_
+
+#define WIFI_SSID "MyNetwork"
+#define WIFI_PASSWORD "MyPassword"
+#define WIFI_COUNTRY CYW43_COUNTRY_FRANCE
+#define ODOO_HOST "odoo.example.com"
+#define ODOO_PORT 443
+#define ODOO_DB "mydb"
+#define ODOO_LOGIN "me@example.com"
+#define ODOO_API_KEY "paste-api-key-here"
+#define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]],[\"is_closed\",\"=\",false]]"
+#define POLL_INTERVAL_S 300
+#define NTP_SERVER "pool.ntp.org"
+#define TZ_OFFSET_MIN 120
+#define EPD_CLK_HALF_PERIOD_US 1
+
+/*
+** Optional: TLS certificate pinning. When ODOO_CA_CERT is NOT defined the
+** connection is encrypted but the server certificate is NOT verified.
+** To pin your CA, define it as one C string with \n separators, e.g.:
+** #define ODOO_CA_CERT "-----BEGIN CERTIFICATE-----\nMIIB...\n" \
+**     "...\n-----END CERTIFICATE-----\n"
+** (Your personal include/config.h is gitignored and exempt from the
+** single-line-macro style rule.)
+*/
+
+#endif /* !CONFIG_H_ */
