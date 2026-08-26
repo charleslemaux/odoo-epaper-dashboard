@@ -344,7 +344,7 @@ Expect every line to read `<name>: OK` and the command to exit 0.
   reference): almost always a loose Dupont wire on CLK/DIN/DC/CS, or
   the SPI Select switch not on 0. Full diagnostic order in
   `DRIVER_REFERENCE.md` section 6.
-- **Text renders mirrored on the physical panel**: `src/gfx_text.c`
+- **Text renders mirrored on the physical panel**: `src/gfx/gfx_text.c`
   reads each `font8x8` row LSB-leftmost (`(bits >> col) & 1`). If your
   panel behaves as though the bit order is reversed, change that one
   line to `(bits >> (7 - col)) & 1` — a deliberately isolated one-line

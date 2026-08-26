@@ -28,26 +28,26 @@ endif()
 pico_sdk_init()
 
 add_executable(epaper_dashboard
-    src/main.c
-    src/epd_io.c
-    src/epd_driver.c
-    src/gfx.c
-    src/gfx_text.c
-    src/json_str.c
-    src/jsmn_util.c
-    src/odoo_parse.c
-    src/odoo_request.c
-    src/time_fmt.c
-    src/http_util.c
-    src/refresh.c
-    src/dashboard.c
-    src/net_wifi.c
-    src/sys_idle.c
-    src/net_time.c
-    src/http_conn.c
-    src/http_client.c
-    src/odoo_client.c
-    src/panic_log.c
+    src/app/main.c
+    src/app/dashboard.c
+    src/app/refresh.c
+    src/app/time_fmt.c
+    src/app/panic_log.c
+    src/app/sys_idle.c
+    src/epd/epd_io.c
+    src/epd/epd_driver.c
+    src/gfx/gfx.c
+    src/gfx/gfx_text.c
+    src/json/json_str.c
+    src/json/jsmn_util.c
+    src/net/net_wifi.c
+    src/net/net_time.c
+    src/net/http_util.c
+    src/net/http_conn.c
+    src/net/http_client.c
+    src/odoo/odoo_request.c
+    src/odoo/odoo_parse.c
+    src/odoo/odoo_client.c
 )
 
 target_compile_definitions(epaper_dashboard PRIVATE
@@ -58,6 +58,12 @@ target_compile_definitions(epaper_dashboard PRIVATE
 target_include_directories(epaper_dashboard PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/include
+    ${CMAKE_CURRENT_LIST_DIR}/include/app
+    ${CMAKE_CURRENT_LIST_DIR}/include/epd
+    ${CMAKE_CURRENT_LIST_DIR}/include/gfx
+    ${CMAKE_CURRENT_LIST_DIR}/include/json
+    ${CMAKE_CURRENT_LIST_DIR}/include/net
+    ${CMAKE_CURRENT_LIST_DIR}/include/odoo
     ${CMAKE_CURRENT_LIST_DIR}/lib/jsmn
     ${CMAKE_CURRENT_LIST_DIR}/lib/font8x8
 )
