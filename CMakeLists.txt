@@ -32,6 +32,7 @@ add_executable(epaper_dashboard
     src/net_time.c
     src/http_conn.c
     src/http_client.c
+    src/odoo_client.c
 )
 
 target_include_directories(epaper_dashboard PRIVATE
