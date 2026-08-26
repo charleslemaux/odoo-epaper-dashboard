@@ -35,8 +35,8 @@ static void test_glyph_draws_pixels(void)
 {
     static uint8_t fb[GFX_BUFFER_SIZE];
     struct gfx_style st = {0, 0, GFX_BLACK, 2};
-    struct gfx_rect box = {0, 0, 32, 16};
-    struct gfx_rect below = {0, 16, GFX_WIDTH, 32};
+    struct gfx_rect box = {0, 0, 64, 32};
+    struct gfx_rect below = {0, 32, GFX_WIDTH, 32};
 
     gfx_fill(fb, GFX_WHITE);
     gfx_text(fb, &st, "A");
@@ -48,7 +48,7 @@ static void test_large_font_is_taller(void)
 {
     static uint8_t fb[GFX_BUFFER_SIZE];
     struct gfx_style st = {0, 0, GFX_BLACK, 3};
-    struct gfx_rect lower = {0, 16, GFX_WIDTH, 8};
+    struct gfx_rect lower = {0, 32, GFX_WIDTH, 16};
 
     gfx_fill(fb, GFX_WHITE);
     gfx_text(fb, &st, "Ag");
@@ -71,8 +71,8 @@ static void test_centering(void)
     static uint8_t fb[GFX_BUFFER_SIZE];
     struct gfx_style st = {0, 100, GFX_RED, 2};
     int width = gfx_text_width("ab", 2);
-    struct gfx_rect left = {0, 100, (GFX_WIDTH - width) / 2 - 1, 16};
-    struct gfx_rect band = {0, 100, GFX_WIDTH, 16};
+    struct gfx_rect left = {0, 100, (GFX_WIDTH - width) / 2 - 1, 32};
+    struct gfx_rect band = {0, 100, GFX_WIDTH, 32};
 
     gfx_fill(fb, GFX_WHITE);
     gfx_text_centered(fb, &st, "ab");

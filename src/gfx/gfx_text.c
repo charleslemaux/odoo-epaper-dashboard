@@ -11,8 +11,8 @@
 static struct gfx_font const *font_for(int scale)
 {
     if (scale >= 3)
-        return &GFX_FONT_24;
-    return &GFX_FONT_16;
+        return &GFX_FONT_48;
+    return &GFX_FONT_32;
 }
 
 static struct gfx_glyph const *glyph_for(struct gfx_font const *font,
@@ -67,6 +67,21 @@ int gfx_text_width(char const *s, int scale)
     for (size_t i = 0; s[i] != '\0'; i++)
         width += glyph_for(font, s[i])->advance;
     return width;
+}
+
+int gfx_text_fit(char const *s, int scale, int max_width)
+{
+    struct gfx_font const *font = font_for(scale);
+    int width = 0;
+    int count = 0;
+
+    for (size_t i = 0; s[i] != '\0'; i++) {
+        width += glyph_for(font, s[i])->advance;
+        if (width > max_width)
+            return count;
+        count++;
+    }
+    return count;
 }
 
 void gfx_text_centered(uint8_t *fb, struct gfx_style const *st,

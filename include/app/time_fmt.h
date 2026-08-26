@@ -22,5 +22,6 @@ void time_fmt_banner(char *dst, size_t size, struct tm const *lt);
 void time_fmt_hhmm(char *dst, size_t size, struct tm const *lt);
 void time_fmt_ddmm(char *dst, size_t size, char const *iso);
 int time_fmt_deadline_class(char const *iso, struct tm const *today);
+int time_fmt_days_late(char const *iso, struct tm const *today);
 
 #endif /* !TIME_FMT_H_ */

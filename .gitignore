@@ -10,3 +10,4 @@ tests/*.exe
 *.pyc
 __pycache__/
 .vscode/
+tests/preview.raw

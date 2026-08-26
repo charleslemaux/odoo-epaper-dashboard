@@ -18,6 +18,26 @@ static void add_task(struct odoo_task *task, char const *name,
     snprintf(task->stage, sizeof(task->stage), "%s", stage);
 }
 
+static void fill_tasks(struct odoo_task_list *list)
+{
+    list->count = 6;
+    add_task(&list->tasks[0], "Corriger module facture",
+        "2026-08-25", "En cours");
+    add_task(&list->tasks[1],
+        "Refonte complete du parcours de commande avec validation",
+        "2026-08-27", "A faire");
+    add_task(&list->tasks[2], "Migration serveur Odoo",
+        "2026-09-02", "A faire");
+    add_task(&list->tasks[3], "Preparer la demo client",
+        "", "Backlog");
+    add_task(&list->tasks[4], "Relancer le fournisseur",
+        "2026-08-19", "En cours");
+    add_task(&list->tasks[5], "Point equipe hebdo",
+        "2026-08-28", "A faire");
+    list->tasks[0].priority = 1;
+    list->tasks[4].priority = 1;
+}
+
 static void fill_sample(struct dashboard_data *d, struct snapshot *snap)
 {
     memset(snap, 0, sizeof(*snap));
@@ -28,16 +48,7 @@ static void fill_sample(struct dashboard_data *d, struct snapshot *snap)
     d->today.tm_mday = 27;
     snprintf(d->banner_date, sizeof(d->banner_date), "jeu 27/08");
     snprintf(d->updated_hhmm, sizeof(d->updated_hhmm), "00:25");
-    snap->list.count = 4;
-    add_task(&snap->list.tasks[0], "Corriger module facture",
-        "2026-08-25", "En cours");
-    add_task(&snap->list.tasks[1], "Banniere site web",
-        "2026-08-27", "A faire");
-    add_task(&snap->list.tasks[2], "Migration serveur Odoo",
-        "2026-09-02", "A faire");
-    add_task(&snap->list.tasks[3], "Preparer la demo client",
-        "", "Backlog");
-    snap->list.tasks[0].priority = 1;
+    fill_tasks(&snap->list);
 }
 
 int main(void)

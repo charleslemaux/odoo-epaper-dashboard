@@ -88,11 +88,11 @@ static void test_overflow(void)
     static char json[4096];
     struct odoo_task_list list;
 
-    build_many(json, sizeof(json), 13);
+    build_many(json, sizeof(json), 8);
     assert(odoo_parse_tasks(json, strlen(json), &list) == 0);
-    assert(list.count == 12);
+    assert(list.count == 7);
     assert(list.overflow == 1);
-    assert(strcmp(list.tasks[11].name, "T11") == 0);
+    assert(strcmp(list.tasks[6].name, "T6") == 0);
 }
 
 int main(void)

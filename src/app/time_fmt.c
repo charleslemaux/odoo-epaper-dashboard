@@ -6,6 +6,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "time_fmt.h"
 
@@ -50,6 +51,32 @@ static void make_iso(char *dst, size_t size, struct tm const *t)
     #if defined(__GNUC__) && !defined(__clang__)
         #pragma GCC diagnostic pop
     #endif
+}
+
+static int parse_iso(char const *iso, struct tm *out)
+{
+    if (strlen(iso) < 10 || iso[4] != '-' || iso[7] != '-')
+        return -1;
+    out->tm_year = atoi(iso) - 1900;
+    out->tm_mon = atoi(iso + 5) - 1;
+    out->tm_mday = atoi(iso + 8);
+    return 0;
+}
+
+int time_fmt_days_late(char const *iso, struct tm const *today)
+{
+    struct tm due = {0};
+    struct tm now = *today;
+
+    if (iso == 0 || parse_iso(iso, &due) != 0)
+        return 0;
+    due.tm_hour = 12;
+    due.tm_isdst = -1;
+    now.tm_hour = 12;
+    now.tm_min = 0;
+    now.tm_sec = 0;
+    now.tm_isdst = -1;
+    return (int)((mktime(&now) - mktime(&due)) / 86400);
 }
 
 int time_fmt_deadline_class(char const *iso, struct tm const *today)

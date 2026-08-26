@@ -12,10 +12,19 @@
     #include "gfx.h"
     #include "refresh.h"
 
-#define DASH_BANNER_H 60
-#define DASH_ROWS_TOP 70
-#define DASH_ROW_H 32
-#define DASH_FOOTER_Y 458
+#define DASH_BANNER_H 72
+#define DASH_ROWS_TOP 80
+#define DASH_ROW_H 48
+#define DASH_FOOTER_Y 444
+#define DASH_MARGIN 16
+#define DASH_NAME_X 44
+#define DASH_GAP 24
+
+struct dash_span {
+    int y;
+    int from;
+    int to;
+};
 
 struct dashboard_data {
     struct snapshot const *snap;

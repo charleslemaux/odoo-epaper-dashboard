@@ -48,8 +48,8 @@ static void test_banner_and_rows(void)
     static uint8_t fb[GFX_BUFFER_SIZE];
     static struct snapshot snap;
     struct dashboard_data d;
-    struct gfx_rect star = {8, 70, 24, 32};
-    struct gfx_rect date = {576, 70, 80, 32};
+    struct gfx_rect star = {8, 80, 36, 48};
+    struct gfx_rect date = {GFX_WIDTH - 160, 80, 160, 48};
 
     fill_data(&d, &snap);
     snap.list.count = 1;
@@ -79,7 +79,7 @@ static void test_offline_footer(void)
     static uint8_t fb[GFX_BUFFER_SIZE];
     static struct snapshot snap;
     struct dashboard_data d;
-    struct gfx_rect footer = {0, 450, GFX_WIDTH, 30};
+    struct gfx_rect footer = {0, 440, GFX_WIDTH, 40};
 
     fill_data(&d, &snap);
     snap.offline = 1;

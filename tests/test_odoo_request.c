@@ -36,7 +36,7 @@ static void test_tasks_body(void)
     assert(strstr(body, "[[\"user_ids\",\"in\",[42]],"
         "[\"project_id\",\"!=\",false]]") != 0);
     assert(strstr(body, "\"|\"") == 0);
-    assert(strstr(body, "\"limit\":13") != 0);
+    assert(strstr(body, "\"limit\":8") != 0);
     assert(strstr(body, "date_deadline asc, priority desc") != 0);
 }
 

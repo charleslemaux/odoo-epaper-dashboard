@@ -65,12 +65,24 @@ static void test_month_rollover(void)
     assert(time_fmt_deadline_class("2026-09-02", &today) == DL_NORMAL);
 }
 
+static void test_days_late(void)
+{
+    struct tm today = make_date(2026, 8, 26);
+
+    assert(time_fmt_days_late("2026-08-24", &today) == 2);
+    assert(time_fmt_days_late("2026-08-26", &today) == 0);
+    assert(time_fmt_days_late("2026-08-28", &today) == -2);
+    assert(time_fmt_days_late("2026-07-26", &today) == 31);
+    assert(time_fmt_days_late("", &today) == 0);
+}
+
 int main(void)
 {
     test_banner_and_hhmm();
     test_ddmm();
     test_deadline_class();
     test_month_rollover();
+    test_days_late();
     printf("test_time_fmt: OK\n");
     return 0;
 }

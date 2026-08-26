@@ -8,7 +8,7 @@
 #ifndef ODOO_H_
     #define ODOO_H_
 
-#define ODOO_MAX_TASKS 12
+#define ODOO_MAX_TASKS 7
 #define ODOO_FETCH_LIMIT (ODOO_MAX_TASKS + 1)
 #define ODOO_REQ_CAP 2048
 

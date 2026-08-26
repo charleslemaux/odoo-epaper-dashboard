@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate embedded bitmap fonts from a TTF for the e-paper dashboard.
 
-Renders ASCII 32..126 at fixed pixel heights (16 and 24) into 1-bit
+Renders ASCII 32..126 at fixed pixel heights (32 and 48) into 1-bit
 bitmaps with per-glyph proportional advances, and writes them as C data:
 src/gfx/font_data.c and include/gfx/font_data.h.
 
@@ -104,8 +104,8 @@ def write_h(root):
            "    struct gfx_glyph const *glyphs;",
            "    uint8_t const *bitmap;",
            "};", "",
-           "extern const struct gfx_font GFX_FONT_16;",
-           "extern const struct gfx_font GFX_FONT_24;", "",
+           "extern const struct gfx_font GFX_FONT_32;",
+           "extern const struct gfx_font GFX_FONT_48;", "",
            "#endif /* !FONT_DATA_H_ */"]
     path = root / "include" / "gfx" / "font_data.h"
     path.write_text("\n".join(out) + "\n", newline="\n")
@@ -117,7 +117,7 @@ def main():
         raise SystemExit(__doc__)
     root = Path(__file__).resolve().parent.parent
     fonts = []
-    for name, height in (("Q16", 16), ("Q24", 24)):
+    for name, height in (("Q32", 32), ("Q48", 48)):
         glyphs, blob = build_font(sys.argv[1], height)
         fonts.append((name, height, glyphs, blob))
         print("font %dpx: %d glyphs, %d bytes" % (height, len(glyphs),

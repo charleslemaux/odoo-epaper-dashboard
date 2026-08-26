@@ -22,7 +22,7 @@ struct gfx_font {
     uint8_t const *bitmap;
 };
 
-extern const struct gfx_font GFX_FONT_16;
-extern const struct gfx_font GFX_FONT_24;
+extern const struct gfx_font GFX_FONT_32;
+extern const struct gfx_font GFX_FONT_48;
 
 #endif /* !FONT_DATA_H_ */
