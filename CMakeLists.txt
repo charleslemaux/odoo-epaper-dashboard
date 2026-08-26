@@ -6,10 +6,27 @@ include(pico_sdk_import.cmake)
 project(epaper_dashboard C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 
+if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/include/config.h)
+    message(FATAL_ERROR
+        "include/config.h missing: copy config.h.example there first")
+endif()
+
 pico_sdk_init()
 
 add_executable(epaper_dashboard
     src/main.c
+    src/epd_io.c
+    src/epd_driver.c
+    src/gfx.c
+    src/gfx_text.c
+    src/json_str.c
+    src/jsmn_util.c
+    src/odoo_parse.c
+    src/odoo_request.c
+    src/time_fmt.c
+    src/http_util.c
+    src/refresh.c
+    src/dashboard.c
 )
 
 target_include_directories(epaper_dashboard PRIVATE
@@ -23,6 +40,7 @@ target_compile_options(epaper_dashboard PRIVATE -Wall -Wextra)
 
 target_link_libraries(epaper_dashboard
     pico_stdlib
+    hardware_watchdog
 )
 
 pico_enable_stdio_usb(epaper_dashboard 1)
