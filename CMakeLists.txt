@@ -27,6 +27,8 @@ add_executable(epaper_dashboard
     src/http_util.c
     src/refresh.c
     src/dashboard.c
+    src/net_wifi.c
+    src/sys_idle.c
 )
 
 target_include_directories(epaper_dashboard PRIVATE
@@ -40,6 +42,7 @@ target_compile_options(epaper_dashboard PRIVATE -Wall -Wextra)
 
 target_link_libraries(epaper_dashboard
     pico_stdlib
+    pico_cyw43_arch_lwip_poll
     hardware_watchdog
 )
 
