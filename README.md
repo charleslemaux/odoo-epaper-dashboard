@@ -185,13 +185,17 @@ time: `%d` is replaced with the `uid` returned by `authenticate`. The
 default,
 
 ```c
-#define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]],[\"is_closed\",\"=\",false]]"
+#define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]],[\"is_closed\",\"=\",false],\"|\",[\"project_id\",\"!=\",false],[\"date_deadline\",\"!=\",false]]"
 ```
 
 fetches tasks assigned to the current user whose stage isn't a "closed"
-(folded) stage. If your Odoo version's `project.task` model doesn't
-have `is_closed` (older or heavily customized instances), edit this one
-line — for example, filter on the stage's own `fold` flag instead:
+(folded) stage, keeping personal To-dos (Odoo stores them as
+`project.task` rows without a project) only when they carry a deadline:
+the trailing `"|"` clause reads "has a project OR has a deadline".
+Remove that clause to show every to-do, deadline or not. If your Odoo
+version's `project.task` model doesn't have `is_closed` (older or
+heavily customized instances), edit this one line — for example, filter
+on the stage's own `fold` flag instead:
 
 ```c
 #define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]],[\"stage_id.fold\",\"=\",false]]"
