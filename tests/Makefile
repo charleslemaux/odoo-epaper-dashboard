@@ -31,7 +31,7 @@ test_odoo_request.exe: test_odoo_request.c ../src/odoo/odoo_request.c
 
 test_odoo_request_todos.exe: test_odoo_request_todos.c \
 	../src/odoo/odoo_request.c
-	$(CC) $(CFLAGS) -DODOO_INCLUDE_UNDATED_TODOS=1 -o $@ $^
+	$(CC) $(CFLAGS) -DODOO_INCLUDE_DATED_TODOS=1 -o $@ $^
 
 test_time_fmt.exe: test_time_fmt.c ../src/app/time_fmt.c
 	$(CC) $(CFLAGS) -o $@ $^

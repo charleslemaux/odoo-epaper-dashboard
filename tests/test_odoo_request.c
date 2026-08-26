@@ -33,9 +33,9 @@ static void test_tasks_body(void)
     assert(strstr(body, "\"execute_kw\"") != 0);
     assert(strstr(body, "\"project.task\"") != 0);
     assert(strstr(body, "\"search_read\"") != 0);
-    assert(strstr(body, "[[\"user_ids\",\"in\",[42]],\"|\","
-        "[\"project_id\",\"!=\",false],"
-        "[\"date_deadline\",\"!=\",false]]") != 0);
+    assert(strstr(body, "[[\"user_ids\",\"in\",[42]],"
+        "[\"project_id\",\"!=\",false]]") != 0);
+    assert(strstr(body, "\"|\"") == 0);
     assert(strstr(body, "\"limit\":13") != 0);
     assert(strstr(body, "date_deadline asc, priority desc") != 0);
 }

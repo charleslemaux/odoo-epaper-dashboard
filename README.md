@@ -157,7 +157,7 @@ Fields, in the order they appear in `config.h.example`:
 | `ODOO_LOGIN` | Your Odoo login (usually an email address). |
 | `ODOO_API_KEY` | An Odoo API key (not your account password — see below). |
 | `ODOO_TASK_DOMAIN` | A JSON-RPC domain filter, as a C string with `%d` where the authenticated `uid` goes (see below). |
-| `ODOO_INCLUDE_UNDATED_TODOS` | `0` (default) hides personal To-dos that have no deadline; `1` shows every to-do (see below). |
+| `ODOO_INCLUDE_DATED_TODOS` | `1` (default) shows personal To-dos that carry a deadline alongside project tasks; `0` shows project tasks only. Undated to-dos never appear in either mode (see below). |
 | `POLL_INTERVAL_S` | Seconds between Odoo polls, default 300 (5 minutes). |
 | `NTP_SERVER` | SNTP server for time sync, e.g. `pool.ntp.org`. |
 | `TZ_OFFSET_MIN` | Local timezone offset from UTC, in minutes (no DST database — a plain fixed offset, adjust by hand across DST changes). |
@@ -193,11 +193,12 @@ fetches tasks assigned to the current user whose stage isn't a "closed"
 (folded) stage.
 
 Odoo stores personal To-dos as `project.task` rows without a project,
-so they match this domain too. With `ODOO_INCLUDE_UNDATED_TODOS` set to
-`0` (the default), the firmware appends a "has a project OR has a
-deadline" clause to the domain at request-build time: project tasks
-always show, personal to-dos only when they carry a deadline. Set it to
-`1` to show every to-do again — no other change needed.
+so they match this domain too. The firmware always appends a filter to
+the domain at request-build time, controlled by
+`ODOO_INCLUDE_DATED_TODOS`: with `1` (the default) it appends a "has a
+project OR has a deadline" clause — project tasks plus dated to-dos;
+with `0` it appends a "has a project" clause — project tasks only.
+Undated to-dos never appear in either mode.
 
 If your Odoo version's `project.task` model doesn't have `is_closed`
 (older or heavily customized instances), edit the domain line — for

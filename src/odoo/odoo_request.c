@@ -23,8 +23,10 @@ static const char TASKS_TEMPLATE[] = "{\"jsonrpc\":\"2.0\","
     "\"limit\":%d,\"order\":\"date_deadline asc, priority desc\"}]},"
     "\"id\":2}";
 
-static const char TODO_FILTER[] = ",\"|\",[\"project_id\",\"!=\",false],"
-    "[\"date_deadline\",\"!=\",false]]";
+static const char DATED_TODO_FILTER[] = ",\"|\","
+    "[\"project_id\",\"!=\",false],[\"date_deadline\",\"!=\",false]]";
+
+static const char PROJECT_ONLY_FILTER[] = ",[\"project_id\",\"!=\",false]]";
 
 int odoo_build_auth(char *dst, size_t size)
 {
@@ -36,14 +38,14 @@ int odoo_build_auth(char *dst, size_t size)
     return written;
 }
 
-static int append_todo_filter(char *dst, size_t size, int len)
+static int append_filter(char *dst, size_t size, int len, char const *filter)
 {
     size_t room = size - (size_t)(len - 1);
     int written = 0;
 
     if (len < 2 || dst[len - 1] != ']')
         return -1;
-    written = snprintf(dst + len - 1, room, "%s", TODO_FILTER);
+    written = snprintf(dst + len - 1, room, "%s", filter);
     if (written < 0 || (size_t)written >= room)
         return -1;
     return len - 1 + written;
@@ -55,9 +57,9 @@ static int build_domain(char *dst, size_t size, int uid)
 
     if (written < 1 || (size_t)written >= size)
         return -1;
-    if (ODOO_INCLUDE_UNDATED_TODOS != 0)
-        return written;
-    return append_todo_filter(dst, size, written);
+    if (ODOO_INCLUDE_DATED_TODOS != 0)
+        return append_filter(dst, size, written, DATED_TODO_FILTER);
+    return append_filter(dst, size, written, PROJECT_ONLY_FILTER);
 }
 
 int odoo_build_tasks(char *dst, size_t size, int uid)

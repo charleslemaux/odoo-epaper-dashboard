@@ -16,8 +16,8 @@
 #define ODOO_LOGIN "tester@test.lan"
 #define ODOO_API_KEY "test-key"
 #define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]]]"
-    #ifndef ODOO_INCLUDE_UNDATED_TODOS
-        #define ODOO_INCLUDE_UNDATED_TODOS 0
+    #ifndef ODOO_INCLUDE_DATED_TODOS
+        #define ODOO_INCLUDE_DATED_TODOS 0
     #endif
 #define POLL_INTERVAL_S 300
 #define NTP_SERVER "pool.ntp.org"

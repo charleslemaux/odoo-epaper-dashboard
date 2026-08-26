@@ -17,7 +17,7 @@
 #define ODOO_LOGIN "me@example.com"
 #define ODOO_API_KEY "paste-api-key-here"
 #define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]],[\"is_closed\",\"=\",false]]"
-#define ODOO_INCLUDE_UNDATED_TODOS 0
+#define ODOO_INCLUDE_DATED_TODOS 1
 #define POLL_INTERVAL_S 300
 #define NTP_SERVER "pool.ntp.org"
 #define TZ_OFFSET_MIN 120
