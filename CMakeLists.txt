@@ -47,6 +47,12 @@ add_executable(epaper_dashboard
     src/http_conn.c
     src/http_client.c
     src/odoo_client.c
+    src/panic_log.c
+)
+
+target_compile_definitions(epaper_dashboard PRIVATE
+    PICO_PANIC_FUNCTION=panic_log_store
+    PICO_PANIC_FUNCTION_DOES_NOT_RETURN=1
 )
 
 target_include_directories(epaper_dashboard PRIVATE

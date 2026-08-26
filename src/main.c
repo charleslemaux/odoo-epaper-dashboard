@@ -16,6 +16,7 @@
 #include "net_time.h"
 #include "net_wifi.h"
 #include "odoo_client.h"
+#include "panic_log.h"
 #include "sys_idle.h"
 #include "time_fmt.h"
 
@@ -131,6 +132,8 @@ int main(void)
     static struct app app;
 
     stdio_init_all();
+    sleep_ms(2000);
+    panic_log_report();
     watchdog_enable(8000, 1);
     if (net_wifi_init() != 0)
         fatal_blink();

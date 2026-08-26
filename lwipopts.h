@@ -91,6 +91,11 @@
 
 /* project additions: sntp (Task 16) and altcp tls (Task 17) land here */
 
+/* sntp is an app timer not counted by LWIP_NUM_SYS_TIMEOUT_INTERNAL; the
+   default pool (6) is exhausted when the first tcp pcb registers its timer,
+   tripping the sys_timeout assert -> panic. +3 = sntp + margin. */
+#define MEMP_NUM_SYS_TIMEOUT (LWIP_NUM_SYS_TIMEOUT_INTERNAL + 3)
+
 #define SNTP_SERVER_DNS 1
 #define SNTP_STARTUP_DELAY 0
 extern void net_time_sntp_set(unsigned int sec);
