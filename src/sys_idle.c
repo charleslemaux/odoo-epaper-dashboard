@@ -1,5 +1,5 @@
 /*
-** EPITECH PROJECT, 2026
+** Charles Le Maux, 2026
 ** epaper_dashboard
 ** File description:
 ** Watchdog-fed idle wait that keeps the wifi driver polled

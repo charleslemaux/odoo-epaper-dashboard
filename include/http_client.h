@@ -1,5 +1,5 @@
 /*
-** EPITECH PROJECT, 2026
+** Charles Le Maux, 2026
 ** epaper_dashboard
 ** File description:
 ** One-shot HTTPS POST client over lwIP altcp_tls

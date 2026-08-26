@@ -1,5 +1,5 @@
 ##
-## EPITECH PROJECT, 2026
+## Charles Le Maux, 2026
 ## epaper_dashboard
 ## File description:
 ## Host-side unit test build and runner (gcc + make from w64devkit)

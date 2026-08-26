@@ -1,5 +1,5 @@
 /*
-** EPITECH PROJECT, 2026
+** Charles Le Maux, 2026
 ** epaper_dashboard
 ** File description:
 ** Panel init sequence, refresh cycle and deep sleep (port of main.py)

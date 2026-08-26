@@ -1,5 +1,5 @@
 /*
-** EPITECH PROJECT, 2026
+** Charles Le Maux, 2026
 ** epaper_dashboard
 ** File description:
 ** Unit tests for the 4bpp framebuffer primitives

@@ -1,5 +1,5 @@
 /*
-** EPITECH PROJECT, 2026
+** Charles Le Maux, 2026
 ** epaper_dashboard
 ** File description:
 ** Waveshare 7.3 inch e-Paper HAT (E) Spectra 6 driver over paced bit-bang

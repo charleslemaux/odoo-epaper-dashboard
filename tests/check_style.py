@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 HEADER_RE = re.compile(
-    r"\A/\*\n\*\* EPITECH PROJECT, \d{4}\n\*\* .+\n"
+    r"\A/\*\n\*\* Charles Le Maux, \d{4}\n\*\* .+\n"
     r"\*\* File description:\n(\*\* .+\n)+\*/\n")
 FUNC_RE = re.compile(r"^[a-z]", re.M)
 
@@ -16,7 +16,7 @@ def file_errors(path):
         errors.append("CRLF line ending")
     text = raw.decode("utf-8", errors="replace")
     if path.suffix in (".c", ".h") and not HEADER_RE.match(text):
-        errors.append("missing or malformed EPITECH header")
+        errors.append("missing or malformed file header")
     for i, line in enumerate(text.split("\n"), 1):
         if len(line) > 80:
             errors.append(f"line {i}: over 80 columns")
