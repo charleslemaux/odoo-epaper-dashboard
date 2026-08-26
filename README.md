@@ -157,6 +157,7 @@ Fields, in the order they appear in `config.h.example`:
 | `ODOO_LOGIN` | Your Odoo login (usually an email address). |
 | `ODOO_API_KEY` | An Odoo API key (not your account password — see below). |
 | `ODOO_TASK_DOMAIN` | A JSON-RPC domain filter, as a C string with `%d` where the authenticated `uid` goes (see below). |
+| `ODOO_INCLUDE_UNDATED_TODOS` | `0` (default) hides personal To-dos that have no deadline; `1` shows every to-do (see below). |
 | `POLL_INTERVAL_S` | Seconds between Odoo polls, default 300 (5 minutes). |
 | `NTP_SERVER` | SNTP server for time sync, e.g. `pool.ntp.org`. |
 | `TZ_OFFSET_MIN` | Local timezone offset from UTC, in minutes (no DST database — a plain fixed offset, adjust by hand across DST changes). |
@@ -185,17 +186,22 @@ time: `%d` is replaced with the `uid` returned by `authenticate`. The
 default,
 
 ```c
-#define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]],[\"is_closed\",\"=\",false],\"|\",[\"project_id\",\"!=\",false],[\"date_deadline\",\"!=\",false]]"
+#define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]],[\"is_closed\",\"=\",false]]"
 ```
 
 fetches tasks assigned to the current user whose stage isn't a "closed"
-(folded) stage, keeping personal To-dos (Odoo stores them as
-`project.task` rows without a project) only when they carry a deadline:
-the trailing `"|"` clause reads "has a project OR has a deadline".
-Remove that clause to show every to-do, deadline or not. If your Odoo
-version's `project.task` model doesn't have `is_closed` (older or
-heavily customized instances), edit this one line — for example, filter
-on the stage's own `fold` flag instead:
+(folded) stage.
+
+Odoo stores personal To-dos as `project.task` rows without a project,
+so they match this domain too. With `ODOO_INCLUDE_UNDATED_TODOS` set to
+`0` (the default), the firmware appends a "has a project OR has a
+deadline" clause to the domain at request-build time: project tasks
+always show, personal to-dos only when they carry a deadline. Set it to
+`1` to show every to-do again — no other change needed.
+
+If your Odoo version's `project.task` model doesn't have `is_closed`
+(older or heavily customized instances), edit the domain line — for
+example, filter on the stage's own `fold` flag instead:
 
 ```c
 #define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]],[\"stage_id.fold\",\"=\",false]]"

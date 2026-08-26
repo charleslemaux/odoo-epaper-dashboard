@@ -10,8 +10,8 @@ CFLAGS = -Wall -Wextra -Werror -std=gnu11 -Itest_config -I../include \
 	-I../lib/jsmn -I../lib/font8x8
 
 TESTS = test_harness test_json_str test_odoo_parse test_odoo_request \
-	test_time_fmt test_http_util test_refresh test_gfx test_gfx_text \
-	test_dashboard
+	test_odoo_request_todos test_time_fmt test_http_util test_refresh \
+	test_gfx test_gfx_text test_dashboard
 
 all: $(addsuffix .exe,$(TESTS))
 
@@ -27,6 +27,9 @@ test_odoo_parse.exe: test_odoo_parse.c ../src/odoo_parse.c \
 
 test_odoo_request.exe: test_odoo_request.c ../src/odoo_request.c
 	$(CC) $(CFLAGS) -o $@ $^
+
+test_odoo_request_todos.exe: test_odoo_request_todos.c ../src/odoo_request.c
+	$(CC) $(CFLAGS) -DODOO_INCLUDE_UNDATED_TODOS=1 -o $@ $^
 
 test_time_fmt.exe: test_time_fmt.c ../src/time_fmt.c
 	$(CC) $(CFLAGS) -o $@ $^
