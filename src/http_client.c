@@ -52,10 +52,14 @@ int http_post_json(char const *path, char const *body,
 {
     static char resp[HTTP_RESP_CAP];
     static char req[HTTP_REQ_CAP];
-    struct http_ctx ctx = {0, req, 0, resp, HTTP_RESP_CAP, 0, {0}, 0};
+    static struct http_ctx ctx;
+    static unsigned int gen;
     struct altcp_tls_config *tls = make_tls_config();
     int built = http_build_request(req, sizeof(req), path, body);
 
+    gen++;
+    ctx = (struct http_ctx){.request = req, .resp = resp,
+        .resp_cap = HTTP_RESP_CAP, .gen = gen};
     if (tls == 0 || built < 0)
         return finish(&ctx, tls, -1);
     ctx.request_len = (size_t)built;

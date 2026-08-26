@@ -21,7 +21,7 @@
 
 static uint32_t now_s(void)
 {
-    return (uint32_t)(to_ms_since_boot(get_absolute_time()) / 1000u);
+    return (uint32_t)(to_us_since_boot(get_absolute_time()) / 1000000ull);
 }
 
 static void fatal_blink(void)

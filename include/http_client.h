@@ -25,6 +25,7 @@ struct http_ctx {
     size_t resp_len;
     ip_addr_t addr;
     int phase;
+    unsigned int gen;
 };
 
 struct http_response {

@@ -14,11 +14,15 @@
 #include "config.h"
 #include "http_client.h"
 
+static unsigned int dns_gen;
+
 static void cb_dns(char const *name, ip_addr_t const *addr, void *arg)
 {
     struct http_ctx *ctx = arg;
 
     (void)name;
+    if (ctx->gen != dns_gen)
+        return;
     if (addr == 0) {
         ctx->phase = -1;
         return;
@@ -74,8 +78,10 @@ static void cb_err(void *arg, err_t err)
 
 int http_conn_resolve(struct http_ctx *ctx)
 {
-    err_t err = dns_gethostbyname(ODOO_HOST, &ctx->addr, cb_dns, ctx);
+    err_t err;
 
+    dns_gen = ctx->gen;
+    err = dns_gethostbyname(ODOO_HOST, &ctx->addr, cb_dns, ctx);
     if (err == ERR_OK) {
         ctx->phase = 1;
         return 0;
@@ -119,6 +125,8 @@ void http_conn_close(struct http_ctx *ctx)
     if (ctx->pcb == 0)
         return;
     altcp_arg(ctx->pcb, 0);
+    altcp_recv(ctx->pcb, 0);
+    altcp_err(ctx->pcb, 0);
     if (altcp_close(ctx->pcb) != ERR_OK)
         altcp_abort(ctx->pcb);
     ctx->pcb = 0;
