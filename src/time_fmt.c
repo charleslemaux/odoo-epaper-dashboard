@@ -33,13 +33,14 @@ void time_fmt_ddmm(char *dst, size_t size, char const *iso)
     snprintf(dst, size, "%c%c/%c%c", iso[8], iso[9], iso[5], iso[6]);
 }
 
+/*
+** struct tm fields are plain int with no compile-time bound, so GCC's
+** -Wformat-truncation cannot prove the (always-small) year/month/day
+** values fit; the pragma below is the standard, localized workaround,
+** guarded to real GCC since Clang has no -Wformat-truncation.
+*/
 static void make_iso(char *dst, size_t size, struct tm const *t)
 {
-    /* struct tm fields are plain int with no compile-time bound, so GCC's
-       -Wformat-truncation cannot prove the (always-small) year/month/day
-       values fit; this is the standard, localized workaround. Guarded to
-       real GCC only: Clang has no -Wformat-truncation, and naming an
-       unknown warning in a pragma is best not relied on under -Werror. */
     #if defined(__GNUC__) && !defined(__clang__)
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wformat-truncation"
