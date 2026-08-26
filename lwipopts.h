@@ -91,4 +91,9 @@
 
 /* project additions: sntp (Task 16) and altcp tls (Task 17) land here */
 
+#define SNTP_SERVER_DNS 1
+#define SNTP_STARTUP_DELAY 0
+extern void net_time_sntp_set(unsigned int sec);
+#define SNTP_SET_SYSTEM_TIME(sec) net_time_sntp_set(sec)
+
 #endif /* LWIPOPTS_H_ */

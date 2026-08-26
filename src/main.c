@@ -10,6 +10,7 @@
 #include "pico/cyw43_arch.h"
 #include "hardware/watchdog.h"
 #include "net_wifi.h"
+#include "net_time.h"
 #include "sys_idle.h"
 
 int main(void)
@@ -23,11 +24,11 @@ int main(void)
     while (net_wifi_connect() != 0)
         printf("wifi: connect failed, retrying\n");
     printf("wifi: connected\n");
-    for (;;) {
-        net_wifi_led(1);
+    net_time_init();
+    while (net_time_synced() == 0)
         sys_idle_ms(500);
-        net_wifi_led(0);
-        sys_idle_ms(500);
-    }
+    printf("time: synced\n");
+    for (;;)
+        sys_idle_ms(1000);
     return 0;
 }
