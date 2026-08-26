@@ -37,12 +37,18 @@ static void make_iso(char *dst, size_t size, struct tm const *t)
 {
     /* struct tm fields are plain int with no compile-time bound, so GCC's
        -Wformat-truncation cannot prove the (always-small) year/month/day
-       values fit; this is the standard, localized workaround. */
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wformat-truncation"
+       values fit; this is the standard, localized workaround. Guarded to
+       real GCC only: Clang has no -Wformat-truncation, and naming an
+       unknown warning in a pragma is best not relied on under -Werror. */
+    #if defined(__GNUC__) && !defined(__clang__)
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wformat-truncation"
+    #endif
     snprintf(dst, size, "%04d-%02d-%02d", t->tm_year + 1900,
         t->tm_mon + 1, t->tm_mday);
-    #pragma GCC diagnostic pop
+    #if defined(__GNUC__) && !defined(__clang__)
+        #pragma GCC diagnostic pop
+    #endif
 }
 
 int time_fmt_deadline_class(char const *iso, struct tm const *today)
