@@ -8,7 +8,7 @@
 CC ?= gcc
 CFLAGS = -Wall -Wextra -Werror -std=gnu11 -Itest_config -I../include \
 	-I../include/app -I../include/epd -I../include/gfx -I../include/json \
-	-I../include/net -I../include/odoo -I../lib/jsmn -I../lib/font8x8
+	-I../include/net -I../include/odoo -I../lib/jsmn
 
 TESTS = test_harness test_json_str test_odoo_parse test_odoo_request \
 	test_odoo_request_todos test_time_fmt test_http_util test_refresh \
@@ -45,12 +45,18 @@ test_refresh.exe: test_refresh.c ../src/app/refresh.c
 test_gfx.exe: test_gfx.c ../src/gfx/gfx.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-test_gfx_text.exe: test_gfx_text.c ../src/gfx/gfx_text.c ../src/gfx/gfx.c
+test_gfx_text.exe: test_gfx_text.c ../src/gfx/gfx_text.c \
+	../src/gfx/gfx.c ../src/gfx/font_data.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 test_dashboard.exe: test_dashboard.c ../src/app/dashboard.c \
-	../src/gfx/gfx.c ../src/gfx/gfx_text.c ../src/app/time_fmt.c
+	../src/gfx/gfx.c ../src/gfx/gfx_text.c ../src/gfx/font_data.c \
+	../src/app/time_fmt.c
 	$(CC) $(CFLAGS) -o $@ $^
+
+preview.exe: render_preview.c ../src/app/dashboard.c ../src/gfx/gfx.c \
+	../src/gfx/gfx_text.c ../src/gfx/font_data.c ../src/app/time_fmt.c
+	$(CC) $(CFLAGS) -D_CRT_SECURE_NO_WARNINGS -o $@ $^
 
 run: all
 	for t in $(TESTS); do ./$$t.exe || exit 1; done

@@ -17,7 +17,7 @@ static void draw_banner(uint8_t *fb, struct dashboard_data const *d)
     struct gfx_style count = {0, 22, GFX_WHITE, 2};
     char text[24];
 
-    gfx_fill_rect(fb, &bar, GFX_BLUE);
+    gfx_fill_rect(fb, &bar, GFX_GREEN);
     gfx_text(fb, &title, "MES TACHES");
     gfx_text(fb, &date, d->banner_date);
     snprintf(text, sizeof(text), "%u ouvertes", d->snap->list.count);

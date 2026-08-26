@@ -57,7 +57,7 @@ static void test_banner_and_rows(void)
     snprintf(snap.list.tasks[0].name, 64, "Tache urgente");
     snprintf(snap.list.tasks[0].deadline, 11, "2026-08-20");
     dashboard_render(fb, &d);
-    assert(px(fb, 5, 5) == GFX_BLUE);
+    assert(px(fb, 5, 5) == GFX_GREEN);
     assert(region_has(fb, &star, GFX_RED));
     assert(region_has(fb, &date, GFX_RED));
 }

@@ -38,6 +38,7 @@ add_executable(epaper_dashboard
     src/epd/epd_driver.c
     src/gfx/gfx.c
     src/gfx/gfx_text.c
+    src/gfx/font_data.c
     src/json/json_str.c
     src/json/jsmn_util.c
     src/net/net_wifi.c
@@ -65,7 +66,6 @@ target_include_directories(epaper_dashboard PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/include/net
     ${CMAKE_CURRENT_LIST_DIR}/include/odoo
     ${CMAKE_CURRENT_LIST_DIR}/lib/jsmn
-    ${CMAKE_CURRENT_LIST_DIR}/lib/font8x8
 )
 
 target_compile_options(epaper_dashboard PRIVATE -Wall -Wextra)
