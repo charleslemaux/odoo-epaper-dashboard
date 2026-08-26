@@ -30,6 +30,8 @@ add_executable(epaper_dashboard
     src/net_wifi.c
     src/sys_idle.c
     src/net_time.c
+    src/http_conn.c
+    src/http_client.c
 )
 
 target_include_directories(epaper_dashboard PRIVATE
@@ -47,6 +49,8 @@ target_link_libraries(epaper_dashboard
     hardware_watchdog
     pico_lwip_sntp
     pico_aon_timer
+    pico_lwip_mbedtls
+    pico_mbedtls
 )
 
 pico_enable_stdio_usb(epaper_dashboard 1)

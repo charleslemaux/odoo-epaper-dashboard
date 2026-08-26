@@ -21,7 +21,7 @@
 #endif
 #define MEM_ALIGNMENT               4
 #ifndef MEM_SIZE
-#define MEM_SIZE                    4000
+#define MEM_SIZE                    8000
 #endif
 #define MEMP_NUM_TCP_SEG            32
 #define MEMP_NUM_ARP_QUEUE          10
@@ -95,5 +95,9 @@
 #define SNTP_STARTUP_DELAY 0
 extern void net_time_sntp_set(unsigned int sec);
 #define SNTP_SET_SYSTEM_TIME(sec) net_time_sntp_set(sec)
+
+#define LWIP_ALTCP 1
+#define LWIP_ALTCP_TLS 1
+#define LWIP_ALTCP_TLS_MBEDTLS 1
 
 #endif /* LWIPOPTS_H_ */
