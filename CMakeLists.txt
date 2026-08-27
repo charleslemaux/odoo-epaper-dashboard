@@ -34,11 +34,13 @@ add_executable(epaper_dashboard
     src/app/time_fmt.c
     src/app/panic_log.c
     src/app/sys_idle.c
+    src/app/activity_icon.c
     src/epd/epd_io.c
     src/epd/epd_driver.c
     src/gfx/gfx.c
     src/gfx/gfx_text.c
     src/gfx/font_data.c
+    src/gfx/icon_data.c
     src/json/json_str.c
     src/json/jsmn_util.c
     src/net/net_wifi.c

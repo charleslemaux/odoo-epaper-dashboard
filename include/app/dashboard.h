@@ -18,6 +18,8 @@
 #define DASH_FOOTER_Y 444
 #define DASH_MARGIN 16
 #define DASH_GAP 24
+#define DASH_ICON_W 32
+#define DASH_TEXT_X 60
 
 struct dash_span {
     int y;

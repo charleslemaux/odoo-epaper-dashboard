@@ -10,6 +10,7 @@
 #include <string.h>
 #include "gfx.h"
 #include "font_data.h"
+#include "icon_data.h"
 
 static int px(uint8_t const *fb, int x, int y)
 {
@@ -80,6 +81,19 @@ static void test_centering(void)
     assert(count_color(fb, &band, GFX_RED) > 0);
 }
 
+static void test_icon_draws_pixels(void)
+{
+    static uint8_t fb[GFX_BUFFER_SIZE];
+    struct gfx_style st = {0, 0, GFX_BLACK, 2};
+    struct gfx_rect box = {0, 0, 32, 32};
+    struct gfx_rect outside = {32, 0, GFX_WIDTH - 32, 32};
+
+    gfx_fill(fb, GFX_WHITE);
+    gfx_icon(fb, &st, ICON_MAIL);
+    assert(count_color(fb, &box, GFX_BLACK) > 16);
+    assert(count_color(fb, &outside, GFX_BLACK) == 0);
+}
+
 static void test_deterministic(void)
 {
     static uint8_t fb1[GFX_BUFFER_SIZE];
@@ -99,6 +113,7 @@ int main(void)
     test_large_font_is_taller();
     test_proportional_widths();
     test_centering();
+    test_icon_draws_pixels();
     test_deterministic();
     printf("test_gfx_text: OK\n");
     return 0;

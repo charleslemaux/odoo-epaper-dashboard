@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "dashboard.h"
+#include "activity_icon.h"
 #include "time_fmt.h"
 
 static void draw_banner(uint8_t *fb, struct dashboard_data const *d)
@@ -34,14 +35,12 @@ static int deadline_color(struct odoo_activity const *act,
 
     if (cls == DL_OVERDUE)
         return GFX_RED;
-    if (cls == DL_SOON)
-        return GFX_BLUE;
     return GFX_BLACK;
 }
 
 static int draw_name(uint8_t *fb, char const *name, int y, int max_w)
 {
-    struct gfx_style st = {DASH_MARGIN, y, GFX_BLACK, 2};
+    struct gfx_style st = {DASH_TEXT_X, y, GFX_BLACK, 2};
     char text[72];
     int fit = gfx_text_fit(name, 2, max_w);
 
@@ -55,68 +54,66 @@ static int draw_name(uint8_t *fb, char const *name, int y, int max_w)
     return -1;
 }
 
-static void append_fit(char *dst, size_t size, char const *piece, int max)
-{
-    size_t len = strlen(dst);
-
-    if (piece[0] == '\0')
-        return;
-    snprintf(dst + len, size - len, "%s%s", len > 0 ? " - " : "", piece);
-    if (gfx_text_width(dst, 2) > max)
-        dst[len] = '\0';
-}
-
 static void draw_extra(uint8_t *fb, struct odoo_activity const *act,
-    struct tm const *today, struct dash_span const *span)
+    struct dash_span const *span)
 {
     struct gfx_style st = {0, span->y, GFX_BLACK, 2};
-    char info[96];
-    char late[24];
-    int max = span->to - span->from;
+    int width = gfx_text_width(act->record, 2);
+
+    if (act->record[0] == '\0' || width > span->to - span->from)
+        return;
+    st.x = span->to - width;
+    gfx_text(fb, &st, act->record);
+}
+
+static int draw_late(uint8_t *fb, struct odoo_activity const *act,
+    struct tm const *today, struct dash_span const *span)
+{
+    struct gfx_style st = {0, span->y, GFX_RED, 2};
+    char chip[16];
     int days = time_fmt_days_late(act->deadline, today);
 
-    info[0] = '\0';
-    late[0] = '\0';
-    if (days > 0)
-        snprintf(late, sizeof(late), "retard %dj", days);
-    append_fit(info, sizeof(info), late, max);
-    append_fit(info, sizeof(info), act->kind, max);
-    append_fit(info, sizeof(info), act->record, max);
-    if (info[0] == '\0')
-        return;
-    st.x = span->to - gfx_text_width(info, 2);
-    gfx_text(fb, &st, info);
+    if (days <= 0)
+        return span->to;
+    snprintf(chip, sizeof(chip), "%dj", days);
+    st.x = span->to - 12 - gfx_text_width(chip, 2);
+    gfx_text(fb, &st, chip);
+    return st.x;
 }
 
 static void draw_row(uint8_t *fb, struct odoo_activity const *act,
     int y, struct tm const *today)
 {
+    struct gfx_style icon = {DASH_MARGIN, y + 8, GFX_BLACK, 2};
     struct gfx_style date = {0, y + 8, deadline_color(act, today), 2};
     struct dash_span span = {y + 8, 0, 0};
     char ddmm[8];
     int name_end = 0;
 
+    gfx_icon(fb, &icon, activity_icon_for(act->kind));
     time_fmt_ddmm(ddmm, sizeof(ddmm), act->deadline);
     date.x = GFX_WIDTH - DASH_MARGIN - gfx_text_width(ddmm, 2);
     gfx_text(fb, &date, ddmm);
+    span.to = date.x;
+    span.to = draw_late(fb, act, today, &span);
     name_end = draw_name(fb, act->name, y + 8,
-        date.x - DASH_GAP - DASH_MARGIN);
+        span.to - DASH_GAP - DASH_TEXT_X);
     if (name_end < 0)
         return;
     span.from = name_end + DASH_GAP;
-    span.to = date.x - DASH_GAP;
+    span.to -= DASH_GAP;
     if (span.to > span.from)
-        draw_extra(fb, act, today, &span);
+        draw_extra(fb, act, &span);
 }
 
 static void draw_rows(uint8_t *fb, struct dashboard_data const *d)
 {
-    struct gfx_rect sep = {8, 0, GFX_WIDTH - 16, 1};
+    struct gfx_rect sep = {0, 0, GFX_WIDTH, 2};
     int y = DASH_ROWS_TOP;
 
     for (unsigned int i = 0; i < d->snap->list.count; i++) {
         draw_row(fb, &d->snap->list.items[i], y, &d->today);
-        sep.y = y + DASH_ROW_H - 1;
+        sep.y = y + DASH_ROW_H - 2;
         gfx_fill_rect(fb, &sep, GFX_BLACK);
         y += DASH_ROW_H;
     }

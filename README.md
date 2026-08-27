@@ -32,13 +32,16 @@ Screen layout (800x480):
 └────────────────────────────────────────────────────────┘
 ```
 
-Each row is one activity: its summary (or, when the activity has no
-summary, the name of the record it is attached to). The deadline
-(always visible, far right) turns red when overdue, blue when due
-today or tomorrow. The text has priority over the row: if it is too
-long it is truncated with `...`, otherwise the remaining width
-auto-fills with secondary info (overdue days as `retard Nj`, activity
-type, related record) pieces that fit. The footer shows the timestamp
+Each row starts with a 32px icon for the activity type (call, email,
+meeting, to-do, inbox, document, certification, signature — clock for
+anything else; matched by name in `src/app/activity_icon.c`), then the
+activity's summary (or, when the activity has no summary, the name of
+the record it is attached to). The deadline (always visible, far
+right) stays black until the date has passed and turns red once it
+has, joined by a compact red day counter (`8j`). The text has priority
+over the row: if it is too long it is truncated with `...`, otherwise
+the remaining width shows the related record, right-aligned. Bold
+full-width separators divide the rows. The footer shows the timestamp
 of the last *screen update*, not a live clock (a ticking clock would
 force a refresh every minute, defeating the whole point).
 
@@ -49,6 +52,11 @@ at build time into 32 px and 48 px proportional bitmap glyphs
 panel firmware has no TTF rasterizer. To change the font, drop a new
 TTF in `lib/` and run
 `python tools/gen_font.py lib/yourfont/YourFont.ttf`.
+
+Activity-type icons are rasterized the same way from
+[Font Awesome Free](https://fontawesome.com) solid glyphs (icons
+CC BY 4.0, font SIL OFL 1.1 — see `lib/fontawesome/LICENSE.txt`) by
+`tools/gen_icons.py` into `src/gfx/icon_data.c`.
 
 ## 1. Hardware and wiring
 

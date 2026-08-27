@@ -47,5 +47,6 @@ void gfx_text_centered(uint8_t *fb, struct gfx_style const *st,
     char const *s);
 int gfx_text_width(char const *s, int scale);
 int gfx_text_fit(char const *s, int scale, int max_width);
+void gfx_icon(uint8_t *fb, struct gfx_style const *st, int icon);
 
 #endif /* !GFX_H_ */

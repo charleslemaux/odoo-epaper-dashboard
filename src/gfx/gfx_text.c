@@ -7,6 +7,7 @@
 
 #include "gfx.h"
 #include "font_data.h"
+#include "icon_data.h"
 
 static struct gfx_font const *font_for(int scale)
 {
@@ -91,4 +92,9 @@ void gfx_text_centered(uint8_t *fb, struct gfx_style const *st,
 
     cur.x = (GFX_WIDTH - gfx_text_width(s, st->scale)) / 2;
     gfx_text(fb, &cur, s);
+}
+
+void gfx_icon(uint8_t *fb, struct gfx_style const *st, int icon)
+{
+    draw_glyph(fb, st, &GFX_ICONS_32, &GFX_ICONS_32.glyphs[icon]);
 }
