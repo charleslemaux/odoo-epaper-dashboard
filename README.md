@@ -17,20 +17,11 @@ not minimizing pixels touched. Everything runs from a single superloop
 with static buffers; the only dynamic allocation anywhere is mbedTLS's
 internal handshake scratch space, freed right after each TLS handshake.
 
-Screen layout (800x480):
+Screen layout (800x480 — 72px banner with 48px title, seven 48px rows
+of 32px text, 32px footer; rendered by the firmware's own code via
+`make -C tests preview.exe`):
 
-```
-┌────────────────────────────────────────────────────────┐
-│  MES ACTIVITES      jeu 27/08             6 activites  │  banner 72px, 48px title,
-├────────────────────────────────────────────────────────┤  GREEN bg, WHITE text
-│  Rappeler pour le devis    retard 2j - Appel    25/08 │
-│  Relire et valider la proposition commerc...    27/08 │  7 rows x 48px, 32px text:
-│  Envoyer le contrat     Email - Dossier 2318    02/09 │  summary first, deadline
-│  ...                                                  │  pinned right, leftover
-├────────────────────────────────────────────────────────┤  fills with overdue, type
-│  + d'autres activites            mise a jour 14:35     │  and record; footer 32px
-└────────────────────────────────────────────────────────┘
-```
+![Dashboard layout](docs/dashboard_preview.png)
 
 Each row starts with a 32px icon for the activity type (call, email,
 meeting, to-do, inbox, document, certification, signature — clock for
