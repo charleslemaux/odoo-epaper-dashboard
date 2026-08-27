@@ -15,7 +15,7 @@
 #define REFRESH_MAX_AGE_S 86400
 
 struct snapshot {
-    struct odoo_task_list list;
+    struct odoo_activity_list list;
     unsigned int offline;
 };
 

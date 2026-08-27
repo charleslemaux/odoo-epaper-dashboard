@@ -2,7 +2,7 @@
 ** Charles Le Maux, 2026
 ** epaper_dashboard
 ** File description:
-** Odoo sync orchestration: authenticate, fetch tasks, re-auth on error
+** Odoo sync orchestration: authenticate, fetch activities, re-auth
 */
 
 #include <stdio.h>
@@ -26,19 +26,19 @@ static int do_auth(int *uid)
     return 0;
 }
 
-static int do_fetch(int uid, struct odoo_task_list *list)
+static int do_fetch(int uid, struct odoo_activity_list *list)
 {
     static char body[ODOO_REQ_CAP];
     struct http_response resp = {0, 0, 0};
 
-    if (odoo_build_tasks(body, sizeof(body), uid) < 0)
+    if (odoo_build_activities(body, sizeof(body), uid) < 0)
         return -1;
     if (http_post_json("/jsonrpc", body, &resp) != 0)
         return -1;
-    return odoo_parse_tasks(resp.body, resp.body_len, list);
+    return odoo_parse_activities(resp.body, resp.body_len, list);
 }
 
-int odoo_client_sync(int *uid, struct odoo_task_list *list)
+int odoo_client_sync(int *uid, struct odoo_activity_list *list)
 {
     int ret = 0;
 

@@ -11,6 +11,6 @@
     #include <stddef.h>
 
 int odoo_build_auth(char *dst, size_t size);
-int odoo_build_tasks(char *dst, size_t size, int uid);
+int odoo_build_activities(char *dst, size_t size, int uid);
 
 #endif /* !ODOO_REQUEST_H_ */

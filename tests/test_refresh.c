@@ -39,7 +39,7 @@ static void test_change_triggers_when_spaced(void)
 
     memset(&a, 0, sizeof(a));
     memset(&b, 0, sizeof(b));
-    snprintf(b.list.tasks[0].name, sizeof(b.list.tasks[0].name), "X");
+    snprintf(b.list.items[0].name, sizeof(b.list.items[0].name), "X");
     b.list.count = 1;
     assert(refresh_needed(&a, &b, &spaced) == 1);
     assert(refresh_needed(&a, &b, &close) == 0);

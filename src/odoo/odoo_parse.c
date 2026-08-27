@@ -2,9 +2,10 @@
 ** Charles Le Maux, 2026
 ** epaper_dashboard
 ** File description:
-** Odoo JSON-RPC response parsing into the task data model
+** Odoo JSON-RPC response parsing into the activity data model
 */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "jsmn_util.h"
@@ -30,58 +31,51 @@ static void copy_relation(struct jsmn_ctx const *ctx, int idx, char *dst,
         copy_tok(ctx, idx + 2, dst, size);
 }
 
-static unsigned int priority_of(struct jsmn_ctx const *ctx, int idx)
-{
-    jsmntok_t const *tok = &ctx->toks[idx];
-
-    if (tok->type == JSMN_STRING || tok->type == JSMN_PRIMITIVE)
-        return ctx->json[tok->start] == '1';
-    return 0;
-}
-
-static void set_task_field(struct jsmn_ctx const *ctx, int key,
-    struct odoo_task *task)
+static void set_field(struct jsmn_ctx const *ctx, int key,
+    struct odoo_activity *act)
 {
     int val = key + 1;
 
-    if (jsmn_tok_eq(ctx, key, "name"))
-        copy_tok(ctx, val, task->name, sizeof(task->name));
+    if (jsmn_tok_eq(ctx, key, "summary"))
+        copy_tok(ctx, val, act->name, sizeof(act->name));
+    if (jsmn_tok_eq(ctx, key, "res_name"))
+        copy_tok(ctx, val, act->record, sizeof(act->record));
     if (jsmn_tok_eq(ctx, key, "date_deadline"))
-        copy_tok(ctx, val, task->deadline, sizeof(task->deadline));
-    if (jsmn_tok_eq(ctx, key, "project_id"))
-        copy_relation(ctx, val, task->project, sizeof(task->project));
-    if (jsmn_tok_eq(ctx, key, "stage_id"))
-        copy_relation(ctx, val, task->stage, sizeof(task->stage));
-    if (jsmn_tok_eq(ctx, key, "priority"))
-        task->priority = priority_of(ctx, val);
+        copy_tok(ctx, val, act->deadline, sizeof(act->deadline));
+    if (jsmn_tok_eq(ctx, key, "activity_type_id"))
+        copy_relation(ctx, val, act->kind, sizeof(act->kind));
 }
 
-static void parse_task(struct jsmn_ctx const *ctx, int idx,
-    struct odoo_task *task)
+static void parse_activity(struct jsmn_ctx const *ctx, int idx,
+    struct odoo_activity *act)
 {
     int child = idx + 1;
     int pairs = ctx->toks[idx].size;
 
     for (int n = 0; n < pairs; n++) {
-        set_task_field(ctx, child, task);
+        set_field(ctx, child, act);
         child = jsmn_next_sibling(ctx, child + 1);
     }
+    if (act->name[0] != '\0')
+        return;
+    snprintf(act->name, sizeof(act->name), "%s", act->record);
+    act->record[0] = '\0';
 }
 
-static void parse_task_array(struct jsmn_ctx const *ctx, int idx,
-    struct odoo_task_list *list)
+static void parse_activity_array(struct jsmn_ctx const *ctx, int idx,
+    struct odoo_activity_list *list)
 {
     int child = idx + 1;
     int total = ctx->toks[idx].size;
 
     for (int n = 0; n < total; n++) {
-        if (n < ODOO_MAX_TASKS)
-            parse_task(ctx, child, &list->tasks[n]);
+        if (n < ODOO_MAX_ACTIVITIES)
+            parse_activity(ctx, child, &list->items[n]);
         child = jsmn_next_sibling(ctx, child);
     }
-    list->count = total > ODOO_MAX_TASKS ? ODOO_MAX_TASKS
+    list->count = total > ODOO_MAX_ACTIVITIES ? ODOO_MAX_ACTIVITIES
         : (unsigned int)total;
-    list->overflow = total > ODOO_MAX_TASKS;
+    list->overflow = total > ODOO_MAX_ACTIVITIES;
 }
 
 int odoo_parse_auth(char const *json, size_t len, int *uid)
@@ -103,8 +97,8 @@ int odoo_parse_auth(char const *json, size_t len, int *uid)
     return 0;
 }
 
-int odoo_parse_tasks(char const *json, size_t len,
-    struct odoo_task_list *list)
+int odoo_parse_activities(char const *json, size_t len,
+    struct odoo_activity_list *list)
 {
     static jsmntok_t toks[ODOO_MAX_JSON_TOKENS];
     struct jsmn_ctx ctx = {json, len, 0, 0};
@@ -118,6 +112,6 @@ int odoo_parse_tasks(char const *json, size_t len,
     val = jsmn_find_key(&ctx, "result");
     if (val < 0 || val >= ctx.count || ctx.toks[val].type != JSMN_ARRAY)
         return -1;
-    parse_task_array(&ctx, val, list);
+    parse_activity_array(&ctx, val, list);
     return 0;
 }

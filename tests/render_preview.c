@@ -9,33 +9,31 @@
 #include <string.h>
 #include "dashboard.h"
 
-static void add_task(struct odoo_task *task, char const *name,
-    char const *deadline, char const *stage)
+static void add_act(struct odoo_activity *act, char const *name,
+    char const *record, char const *info)
 {
-    snprintf(task->name, sizeof(task->name), "%s", name);
-    snprintf(task->project, sizeof(task->project), "Compta");
-    snprintf(task->deadline, sizeof(task->deadline), "%s", deadline);
-    snprintf(task->stage, sizeof(task->stage), "%s", stage);
+    snprintf(act->name, sizeof(act->name), "%s", name);
+    snprintf(act->record, sizeof(act->record), "%s", record);
+    snprintf(act->deadline, sizeof(act->deadline), "%.10s", info);
+    snprintf(act->kind, sizeof(act->kind), "%s", info + 11);
 }
 
-static void fill_tasks(struct odoo_task_list *list)
+static void fill_acts(struct odoo_activity_list *list)
 {
     list->count = 6;
-    add_task(&list->tasks[0], "Corriger module facture",
-        "2026-08-25", "En cours");
-    add_task(&list->tasks[1],
-        "Refonte complete du parcours de commande avec validation",
-        "2026-08-27", "A faire");
-    add_task(&list->tasks[2], "Migration serveur Odoo",
-        "2026-09-02", "A faire");
-    add_task(&list->tasks[3], "Preparer la demo client",
-        "", "Backlog");
-    add_task(&list->tasks[4], "Relancer le fournisseur",
-        "2026-08-19", "En cours");
-    add_task(&list->tasks[5], "Point equipe hebdo",
-        "2026-08-28", "A faire");
-    list->tasks[0].priority = 1;
-    list->tasks[4].priority = 1;
+    add_act(&list->items[0], "Rappeler pour le devis",
+        "Jean Dupont", "2026-08-25 Appel");
+    add_act(&list->items[1],
+        "Relire et valider la proposition commerciale complete",
+        "Societe Martin & Fils", "2026-08-27 A faire");
+    add_act(&list->items[2], "Facture F0042",
+        "", "2026-08-19 Relance");
+    add_act(&list->items[3], "Envoyer le contrat signe",
+        "Dossier 2318", "2026-09-02 Email");
+    add_act(&list->items[4], "Point hebdo equipe",
+        "", "2026-08-28 Reunion");
+    add_act(&list->items[5], "Preparer la demo",
+        "Projet Alpha", "2026-09-05 A faire");
 }
 
 static void fill_sample(struct dashboard_data *d, struct snapshot *snap)
@@ -47,8 +45,8 @@ static void fill_sample(struct dashboard_data *d, struct snapshot *snap)
     d->today.tm_mon = 7;
     d->today.tm_mday = 27;
     snprintf(d->banner_date, sizeof(d->banner_date), "jeu 27/08");
-    snprintf(d->updated_hhmm, sizeof(d->updated_hhmm), "00:25");
-    fill_tasks(&snap->list);
+    snprintf(d->updated_hhmm, sizeof(d->updated_hhmm), "03:15");
+    fill_acts(&snap->list);
 }
 
 int main(void)

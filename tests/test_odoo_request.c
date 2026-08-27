@@ -24,20 +24,21 @@ static void test_auth_body(void)
     assert(strstr(body, "\"test-key\"") != 0);
 }
 
-static void test_tasks_body(void)
+static void test_activities_body(void)
 {
     char body[2048];
-    int len = odoo_build_tasks(body, sizeof(body), 42);
+    int len = odoo_build_activities(body, sizeof(body), 42);
 
     assert(len > 0);
     assert(strstr(body, "\"execute_kw\"") != 0);
-    assert(strstr(body, "\"project.task\"") != 0);
+    assert(strstr(body, "\"mail.activity\"") != 0);
     assert(strstr(body, "\"search_read\"") != 0);
-    assert(strstr(body, "[[\"user_ids\",\"in\",[42]],"
-        "[\"project_id\",\"!=\",false]]") != 0);
-    assert(strstr(body, "\"|\"") == 0);
+    assert(strstr(body, "[[\"user_id\",\"=\",42]]") != 0);
+    assert(strstr(body, "\"res_name\"") != 0);
+    assert(strstr(body, "\"summary\"") != 0);
+    assert(strstr(body, "\"activity_type_id\"") != 0);
     assert(strstr(body, "\"limit\":8") != 0);
-    assert(strstr(body, "date_deadline asc, priority desc") != 0);
+    assert(strstr(body, "\"order\":\"date_deadline asc\"") != 0);
 }
 
 static void test_truncation(void)
@@ -45,13 +46,13 @@ static void test_truncation(void)
     char body[32];
 
     assert(odoo_build_auth(body, sizeof(body)) == -1);
-    assert(odoo_build_tasks(body, sizeof(body), 1) == -1);
+    assert(odoo_build_activities(body, sizeof(body), 1) == -1);
 }
 
 int main(void)
 {
     test_auth_body();
-    test_tasks_body();
+    test_activities_body();
     test_truncation();
     printf("test_odoo_request: OK\n");
     return 0;

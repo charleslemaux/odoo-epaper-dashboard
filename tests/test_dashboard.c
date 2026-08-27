@@ -48,17 +48,17 @@ static void test_banner_and_rows(void)
     static uint8_t fb[GFX_BUFFER_SIZE];
     static struct snapshot snap;
     struct dashboard_data d;
-    struct gfx_rect star = {8, 80, 36, 48};
+    struct gfx_rect name = {16, 80, 300, 48};
     struct gfx_rect date = {GFX_WIDTH - 160, 80, 160, 48};
 
     fill_data(&d, &snap);
     snap.list.count = 1;
-    snap.list.tasks[0].priority = 1;
-    snprintf(snap.list.tasks[0].name, 64, "Tache urgente");
-    snprintf(snap.list.tasks[0].deadline, 11, "2026-08-20");
+    snprintf(snap.list.items[0].name, 64, "Activite urgente");
+    snprintf(snap.list.items[0].deadline, 11, "2026-08-20");
+    snprintf(snap.list.items[0].kind, 24, "Appel");
     dashboard_render(fb, &d);
     assert(px(fb, 5, 5) == GFX_GREEN);
-    assert(region_has(fb, &star, GFX_RED));
+    assert(region_has(fb, &name, GFX_BLACK));
     assert(region_has(fb, &date, GFX_RED));
 }
 
@@ -97,7 +97,7 @@ static void test_deterministic(void)
 
     fill_data(&d, &snap);
     snap.list.count = 1;
-    snprintf(snap.list.tasks[0].name, 64, "Stable");
+    snprintf(snap.list.items[0].name, 64, "Stable");
     dashboard_render(fb1, &d);
     dashboard_render(fb2, &d);
     assert(memcmp(fb1, fb2, GFX_BUFFER_SIZE) == 0);

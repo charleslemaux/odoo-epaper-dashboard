@@ -62,7 +62,7 @@ static void note_result(struct app *app, int ret)
     if (ret == 0) {
         app->fails = 0;
         app->current.offline = 0;
-        printf("odoo: %u tasks\n", app->current.list.count);
+        printf("odoo: %u activities\n", app->current.list.count);
         return;
     }
     app->fails++;

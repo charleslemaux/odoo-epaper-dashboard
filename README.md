@@ -3,12 +3,14 @@
 Bare-metal C rewrite (Pico SDK, no OS, no dynamic allocation in project
 code) of a MicroPython prototype. A Raspberry Pi Pico 2 W joins your WiFi,
 authenticates against a self-hosted Odoo instance over HTTPS, and shows
-the signed-in user's open project tasks on a Waveshare 7.3" e-Paper HAT
+the signed-in user's scheduled Activities (`mail.activity` — the items
+behind the clock icon in Odoo's top bar, attached to any record: a
+contact, an invoice, a task...) on a Waveshare 7.3" e-Paper HAT
 (E) — Spectra 6, 800x480, 6 fixed colors (black, white, yellow, red,
 blue, green).
 
 It polls Odoo's JSON-RPC API every 5 minutes but only spends a physical
-refresh cycle on the panel when the task list actually changed, or once
+refresh cycle on the panel when the activity list actually changed, or once
 a day for a mandatory health refresh. Spectra 6 panels have no
 partial-refresh mode, so minimizing wear means minimizing *refreshes*,
 not minimizing pixels touched. Everything runs from a single superloop
@@ -19,23 +21,24 @@ Screen layout (800x480):
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  MES TACHES         jeu 27/08              6 ouvertes  │  banner 72px, 48px title,
+│  MES ACTIVITES      jeu 27/08             6 activites  │  banner 72px, 48px title,
 ├────────────────────────────────────────────────────────┤  GREEN bg, WHITE text
-│ * Corriger module facture   retard 2j - Compta   25/08 │
-│   Refonte complete du parcours de commande ...   27/08 │  7 rows x 48px, 32px text:
-│   Migration serveur Odoo    Compta - A faire     02/09 │  name first, deadline pinned
-│   ...                                                  │  right, leftover space fills
-├────────────────────────────────────────────────────────┤  with overdue/project/stage
-│  + d'autres taches               mise a jour 14:35     │  footer 32px
+│  Rappeler pour le devis    retard 2j - Appel    25/08 │
+│  Relire et valider la proposition commerc...    27/08 │  7 rows x 48px, 32px text:
+│  Envoyer le contrat     Email - Dossier 2318    02/09 │  summary first, deadline
+│  ...                                                  │  pinned right, leftover
+├────────────────────────────────────────────────────────┤  fills with overdue, type
+│  + d'autres activites            mise a jour 14:35     │  and record; footer 32px
 └────────────────────────────────────────────────────────┘
 ```
 
-A red `*` marks a high-priority task; the deadline (always visible,
-far right) turns red when overdue, blue when due today or tomorrow.
-The task name has priority over the row: if it is too long it is
-truncated with `...`, otherwise the remaining width auto-fills with
-secondary info (overdue days as `retard Nj`, project, stage) pieces
-that fit. The footer shows the timestamp
+Each row is one activity: its summary (or, when the activity has no
+summary, the name of the record it is attached to). The deadline
+(always visible, far right) turns red when overdue, blue when due
+today or tomorrow. The text has priority over the row: if it is too
+long it is truncated with `...`, otherwise the remaining width
+auto-fills with secondary info (overdue days as `retard Nj`, activity
+type, related record) pieces that fit. The footer shows the timestamp
 of the last *screen update*, not a live clock (a ticking clock would
 force a refresh every minute, defeating the whole point).
 
@@ -169,8 +172,7 @@ Fields, in the order they appear in `config.h.example`:
 | `ODOO_DB` | Odoo database name. |
 | `ODOO_LOGIN` | Your Odoo login (usually an email address). |
 | `ODOO_API_KEY` | An Odoo API key (not your account password — see below). |
-| `ODOO_TASK_DOMAIN` | A JSON-RPC domain filter, as a C string with `%d` where the authenticated `uid` goes (see below). |
-| `ODOO_INCLUDE_DATED_TODOS` | `1` (default) shows personal To-dos that carry a deadline alongside project tasks; `0` shows project tasks only. Undated to-dos never appear in either mode (see below). |
+| `ODOO_ACTIVITY_DOMAIN` | A JSON-RPC domain filter on `mail.activity`, as a C string with `%d` where the authenticated `uid` goes (see below). |
 | `POLL_INTERVAL_S` | Seconds between Odoo polls, default 300 (5 minutes). |
 | `NTP_SERVER` | SNTP server for time sync, e.g. `pool.ntp.org`. |
 | `TZ_OFFSET_MIN` | Local timezone offset from UTC, in minutes (no DST database — a plain fixed offset, adjust by hand across DST changes). |
@@ -192,38 +194,26 @@ avatar (top right) -> **My Profile** -> **Account Security** tab ->
 **New API Key**. Give it a description, confirm, and copy the key
 immediately — Odoo only shows it once.
 
-### Tuning `ODOO_TASK_DOMAIN`
+### Tuning `ODOO_ACTIVITY_DOMAIN`
 
-The domain is a JSON-RPC filter, `printf`-substituted at request-build
-time: `%d` is replaced with the `uid` returned by `authenticate`. The
-default,
-
-```c
-#define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]],[\"is_closed\",\"=\",false]]"
-```
-
-fetches tasks assigned to the current user whose stage isn't a "closed"
-(folded) stage.
-
-Odoo stores personal To-dos as `project.task` rows without a project,
-so they match this domain too. The firmware always appends a filter to
-the domain at request-build time, controlled by
-`ODOO_INCLUDE_DATED_TODOS`: with `1` (the default) it appends a "has a
-project OR has a deadline" clause — project tasks plus dated to-dos;
-with `0` it appends a "has a project" clause — project tasks only.
-Undated to-dos never appear in either mode.
-
-If your Odoo version's `project.task` model doesn't have `is_closed`
-(older or heavily customized instances), edit the domain line — for
-example, filter on the stage's own `fold` flag instead:
+The domain is a JSON-RPC filter on `mail.activity`, `printf`-substituted
+at request-build time: `%d` is replaced with the `uid` returned by
+`authenticate`. The default,
 
 ```c
-#define ODOO_TASK_DOMAIN "[[\"user_ids\",\"in\",[%d]],[\"stage_id.fold\",\"=\",false]]"
+#define ODOO_ACTIVITY_DOMAIN "[[\"user_id\",\"=\",%d]]"
 ```
 
-or drop the second clause entirely to show every assigned task
-regardless of stage. No firmware code needs to change for this — it's
-a config-only edit.
+fetches exactly what Odoo's systray clock shows: every activity
+scheduled for the signed-in user, on any record, ordered by deadline
+(activities always carry one). To narrow it, extend the domain — for
+example, only activities on contacts:
+
+```c
+#define ODOO_ACTIVITY_DOMAIN "[[\"user_id\",\"=\",%d],[\"res_model\",\"=\",\"res.partner\"]]"
+```
+
+No firmware code needs to change for this — it's a config-only edit.
 
 ## 4. Optional: pinning the Odoo CA certificate
 
@@ -369,5 +359,5 @@ Expect every line to read `<name>: OK` and the command to exit 0.
   this is not a credentials problem.
 - **Offline footer shows even though WiFi is clearly up**: check
   `ODOO_HOST`/`ODOO_PORT`/`ODOO_DB`/`ODOO_LOGIN`/`ODOO_API_KEY`, and
-  whether `ODOO_TASK_DOMAIN` matches your Odoo version's `project.task`
-  fields (see "Tuning `ODOO_TASK_DOMAIN`" in section 3).
+  whether `ODOO_ACTIVITY_DOMAIN` only uses `mail.activity` fields
+  (see "Tuning `ODOO_ACTIVITY_DOMAIN`" in section 3).

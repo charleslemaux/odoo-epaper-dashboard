@@ -17,7 +17,6 @@
 #define DASH_ROW_H 48
 #define DASH_FOOTER_Y 444
 #define DASH_MARGIN 16
-#define DASH_NAME_X 44
 #define DASH_GAP 24
 
 struct dash_span {
