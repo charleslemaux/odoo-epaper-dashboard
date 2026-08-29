@@ -90,7 +90,7 @@ static void draw_row(uint8_t *fb, struct odoo_activity const *act,
     char ddmm[8];
     int name_end = 0;
 
-    gfx_icon(fb, &icon, activity_icon_for(act->kind));
+    gfx_icon(fb, &icon, activity_icon_for(act->icon));
     time_fmt_ddmm(ddmm, sizeof(ddmm), act->deadline);
     date.x = GFX_WIDTH - DASH_MARGIN - gfx_text_width(ddmm, 2);
     gfx_text(fb, &date, ddmm);

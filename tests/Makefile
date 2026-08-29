@@ -12,7 +12,7 @@ CFLAGS = -Wall -Wextra -Werror -std=gnu11 -Itest_config -I../include \
 
 TESTS = test_harness test_json_str test_odoo_parse test_odoo_request \
 	test_time_fmt test_http_util test_refresh test_gfx test_gfx_text \
-	test_dashboard
+	test_dashboard test_activity_icon
 
 all: $(addsuffix .exe,$(TESTS))
 
@@ -36,6 +36,10 @@ test_http_util.exe: test_http_util.c ../src/net/http_util.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 test_refresh.exe: test_refresh.c ../src/app/refresh.c
+	$(CC) $(CFLAGS) -o $@ $^
+
+test_activity_icon.exe: test_activity_icon.c \
+	../src/app/activity_icon.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 test_gfx.exe: test_gfx.c ../src/gfx/gfx.c

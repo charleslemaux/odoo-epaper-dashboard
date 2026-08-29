@@ -16,7 +16,7 @@ struct odoo_activity {
     char name[64];
     char record[32];
     char deadline[11];
-    char kind[24];
+    char icon[24];
 };
 
 struct odoo_activity_list {

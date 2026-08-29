@@ -23,9 +23,10 @@ of 32px text, 32px footer; rendered by the firmware's own code via
 
 ![Dashboard layout](docs/dashboard_preview.png)
 
-Each row starts with a 32px icon for the activity type (call, email,
-meeting, to-do, inbox, document, certification, signature — clock for
-anything else; matched by name in `src/app/activity_icon.c`), then the
+Each row starts with a 32px icon mirroring the Font Awesome icon
+configured on the activity type in Odoo itself (the firmware fetches
+each activity's `icon` class and maps it in `src/app/activity_icon.c`;
+unknown classes fall back to a clock), then the
 activity's summary (or, when the activity has no summary, the name of
 the record it is attached to). The deadline (always visible, far
 right) stays black until the date has passed and turns red once it
@@ -47,7 +48,10 @@ TTF in `lib/` and run
 Activity-type icons are rasterized the same way from
 [Font Awesome Free](https://fontawesome.com) solid glyphs (icons
 CC BY 4.0, font SIL OFL 1.1 — see `lib/fontawesome/LICENSE.txt`) by
-`tools/gen_icons.py` into `src/gfx/icon_data.c`.
+`tools/gen_icons.py` into `src/gfx/icon_data.c`. To support a new
+custom activity type: add its glyph codepoint to `tools/gen_icons.py`,
+its `fa-...` class to the table in `src/app/activity_icon.c`, rerun
+the generator, and rebuild.
 
 ## 1. Hardware and wiring
 

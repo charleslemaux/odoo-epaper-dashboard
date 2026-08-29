@@ -23,14 +23,6 @@ static void copy_tok(struct jsmn_ctx const *ctx, int idx, char *dst,
             (size_t)(tok->end - tok->start));
 }
 
-static void copy_relation(struct jsmn_ctx const *ctx, int idx, char *dst,
-    size_t size)
-{
-    dst[0] = '\0';
-    if (ctx->toks[idx].type == JSMN_ARRAY && ctx->toks[idx].size >= 2)
-        copy_tok(ctx, idx + 2, dst, size);
-}
-
 static void set_field(struct jsmn_ctx const *ctx, int key,
     struct odoo_activity *act)
 {
@@ -42,8 +34,8 @@ static void set_field(struct jsmn_ctx const *ctx, int key,
         copy_tok(ctx, val, act->record, sizeof(act->record));
     if (jsmn_tok_eq(ctx, key, "date_deadline"))
         copy_tok(ctx, val, act->deadline, sizeof(act->deadline));
-    if (jsmn_tok_eq(ctx, key, "activity_type_id"))
-        copy_relation(ctx, val, act->kind, sizeof(act->kind));
+    if (jsmn_tok_eq(ctx, key, "icon"))
+        copy_tok(ctx, val, act->icon, sizeof(act->icon));
 }
 
 static void parse_activity(struct jsmn_ctx const *ctx, int idx,

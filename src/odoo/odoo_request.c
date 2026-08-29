@@ -19,7 +19,7 @@ static const char ACTIVITIES_TEMPLATE[] = "{\"jsonrpc\":\"2.0\","
     "\"method\":\"call\",\"params\":{\"service\":\"object\","
     "\"method\":\"execute_kw\",\"args\":[\"%s\",%d,\"%s\","
     "\"mail.activity\",\"search_read\",[%s],{\"fields\":[\"res_name\","
-    "\"summary\",\"activity_type_id\",\"date_deadline\"],"
+    "\"summary\",\"icon\",\"date_deadline\"],"
     "\"limit\":%d,\"order\":\"date_deadline asc\"}]},\"id\":2}";
 
 int odoo_build_auth(char *dst, size_t size)

@@ -89,7 +89,7 @@ static void test_icon_draws_pixels(void)
     struct gfx_rect outside = {32, 0, GFX_WIDTH - 32, 32};
 
     gfx_fill(fb, GFX_WHITE);
-    gfx_icon(fb, &st, ICON_MAIL);
+    gfx_icon(fb, &st, ICON_ENVELOPE);
     assert(count_color(fb, &box, GFX_BLACK) > 16);
     assert(count_color(fb, &outside, GFX_BLACK) == 0);
 }

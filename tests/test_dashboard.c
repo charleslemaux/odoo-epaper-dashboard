@@ -55,7 +55,7 @@ static void test_banner_and_rows(void)
     snap.list.count = 1;
     snprintf(snap.list.items[0].name, 64, "Activite urgente");
     snprintf(snap.list.items[0].deadline, 11, "2026-08-20");
-    snprintf(snap.list.items[0].kind, 24, "Appel");
+    snprintf(snap.list.items[0].icon, 24, "fa-phone");
     dashboard_render(fb, &d);
     assert(px(fb, 5, 5) == GFX_GREEN);
     assert(region_has(fb, &name, GFX_BLACK));

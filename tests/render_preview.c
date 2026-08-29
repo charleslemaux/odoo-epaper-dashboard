@@ -15,25 +15,25 @@ static void add_act(struct odoo_activity *act, char const *name,
     snprintf(act->name, sizeof(act->name), "%s", name);
     snprintf(act->record, sizeof(act->record), "%s", record);
     snprintf(act->deadline, sizeof(act->deadline), "%.10s", info);
-    snprintf(act->kind, sizeof(act->kind), "%s", info + 11);
+    snprintf(act->icon, sizeof(act->icon), "%s", info + 11);
 }
 
 static void fill_acts(struct odoo_activity_list *list)
 {
     list->count = 6;
     add_act(&list->items[0], "Rappeler pour le devis",
-        "Jean Dupont", "2026-08-25 Appel");
+        "Jean Dupont", "2026-08-25 fa-phone");
     add_act(&list->items[1],
         "Relire et valider la proposition commerciale complete",
-        "Societe Martin & Fils", "2026-08-27 A faire");
+        "Societe Martin & Fils", "2026-08-27 fa-code");
     add_act(&list->items[2], "Facture F0042",
-        "", "2026-08-19 Relance");
+        "", "2026-08-19 fa-cube");
     add_act(&list->items[3], "Envoyer le contrat signe",
-        "Dossier 2318", "2026-09-02 Email");
+        "Dossier 2318", "2026-09-02 fa-microchip");
     add_act(&list->items[4], "Point hebdo equipe",
-        "", "2026-08-28 Reunion");
+        "", "2026-08-28 fa-lightbulb-o");
     add_act(&list->items[5], "Preparer la demo",
-        "Projet Alpha", "2026-09-05 A faire");
+        "Projet Alpha", "2026-09-05 fa-calendar-check-o");
 }
 
 static void fill_sample(struct dashboard_data *d, struct snapshot *snap)

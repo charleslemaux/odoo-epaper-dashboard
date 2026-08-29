@@ -36,7 +36,7 @@ static void test_activities_body(void)
     assert(strstr(body, "[[\"user_id\",\"=\",42]]") != 0);
     assert(strstr(body, "\"res_name\"") != 0);
     assert(strstr(body, "\"summary\"") != 0);
-    assert(strstr(body, "\"activity_type_id\"") != 0);
+    assert(strstr(body, "\"icon\"") != 0);
     assert(strstr(body, "\"limit\":8") != 0);
     assert(strstr(body, "\"order\":\"date_deadline asc\"") != 0);
 }

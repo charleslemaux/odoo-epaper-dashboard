@@ -19,10 +19,10 @@ static const char SAMPLE_ERROR[] = "{\"jsonrpc\":\"2.0\",\"id\":2,"
 static const char SAMPLE_ACTS[] = "{\"jsonrpc\":\"2.0\",\"id\":2,"
     "\"result\":[{\"id\":7,\"res_name\":\"Jean Dupont\","
     "\"summary\":\"Rappeler pour le devis\","
-    "\"activity_type_id\":[1,\"Appel\"],"
+    "\"icon\":\"fa-phone\","
     "\"date_deadline\":\"2026-08-30\"},"
     "{\"id\":8,\"res_name\":\"Facture F0042\",\"summary\":false,"
-    "\"activity_type_id\":[4,\"\\u00c0 faire\"],"
+    "\"icon\":\"fa-code\","
     "\"date_deadline\":\"2026-09-01\"}]}";
 
 static void test_auth(void)
@@ -46,7 +46,7 @@ static void test_activities_nominal(void)
     assert(list.overflow == 0);
     assert(strcmp(list.items[0].name, "Rappeler pour le devis") == 0);
     assert(strcmp(list.items[0].record, "Jean Dupont") == 0);
-    assert(strcmp(list.items[0].kind, "Appel") == 0);
+    assert(strcmp(list.items[0].icon, "fa-phone") == 0);
     assert(strcmp(list.items[0].deadline, "2026-08-30") == 0);
 }
 
@@ -58,7 +58,7 @@ static void test_summary_fallback(void)
         &list) == 0);
     assert(strcmp(list.items[1].name, "Facture F0042") == 0);
     assert(strcmp(list.items[1].record, "") == 0);
-    assert(strcmp(list.items[1].kind, "A faire") == 0);
+    assert(strcmp(list.items[1].icon, "fa-code") == 0);
     assert(strcmp(list.items[1].deadline, "2026-09-01") == 0);
 }
 

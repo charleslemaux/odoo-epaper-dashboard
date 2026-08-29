@@ -13,14 +13,18 @@ from PIL import Image, ImageDraw, ImageFont
 
 CELL = 32
 ICONS = [
-    ("ICON_TODO", 0xf00c),
-    ("ICON_MAIL", 0xf0e0),
-    ("ICON_CALL", 0xf095),
-    ("ICON_MEETING", 0xf073),
+    ("ICON_CHECK", 0xf00c),
+    ("ICON_ENVELOPE", 0xf0e0),
+    ("ICON_PHONE", 0xf095),
+    ("ICON_USERS", 0xf0c0),
     ("ICON_INBOX", 0xf01c),
-    ("ICON_DOCUMENT", 0xf15b),
-    ("ICON_CERTIFICATE", 0xf0a3),
-    ("ICON_SIGNATURE", 0xf5b7),
+    ("ICON_CODE", 0xf121),
+    ("ICON_CUBE", 0xf1b2),
+    ("ICON_MICROCHIP", 0xf2db),
+    ("ICON_LIGHTBULB", 0xf0eb),
+    ("ICON_CALENDAR_CHECK", 0xf274),
+    ("ICON_UPLOAD", 0xf093),
+    ("ICON_PEN_SQUARE", 0xf044),
     ("ICON_CLOCK", 0xf017),
 ]
 HEADER = "/*\n** Charles Le Maux, 2026\n** epaper_dashboard\n"

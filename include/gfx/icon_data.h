@@ -11,14 +11,18 @@
     #include "font_data.h"
 
 enum gfx_icon_id {
-    ICON_TODO,
-    ICON_MAIL,
-    ICON_CALL,
-    ICON_MEETING,
+    ICON_CHECK,
+    ICON_ENVELOPE,
+    ICON_PHONE,
+    ICON_USERS,
     ICON_INBOX,
-    ICON_DOCUMENT,
-    ICON_CERTIFICATE,
-    ICON_SIGNATURE,
+    ICON_CODE,
+    ICON_CUBE,
+    ICON_MICROCHIP,
+    ICON_LIGHTBULB,
+    ICON_CALENDAR_CHECK,
+    ICON_UPLOAD,
+    ICON_PEN_SQUARE,
     ICON_CLOCK,
 };
 
