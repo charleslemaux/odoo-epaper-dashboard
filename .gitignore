@@ -11,3 +11,4 @@ tests/*.exe
 __pycache__/
 .vscode/
 tests/preview.raw
+result.json
