@@ -37,8 +37,20 @@ static void test_activities_body(void)
     assert(strstr(body, "\"res_name\"") != 0);
     assert(strstr(body, "\"summary\"") != 0);
     assert(strstr(body, "\"icon\"") != 0);
-    assert(strstr(body, "\"limit\":8") != 0);
+    assert(strstr(body, "\"limit\":7") != 0);
     assert(strstr(body, "\"order\":\"date_deadline asc\"") != 0);
+}
+
+static void test_count_body(void)
+{
+    char body[2048];
+    int len = odoo_build_count(body, sizeof(body), 42);
+
+    assert(len > 0);
+    assert(strstr(body, "\"search_count\"") != 0);
+    assert(strstr(body, "[[\"user_id\",\"=\",42]]") != 0);
+    assert(strstr(body, "\"id\":3") != 0);
+    assert(strstr(body, "\"limit\"") == 0);
 }
 
 static void test_truncation(void)
@@ -47,12 +59,14 @@ static void test_truncation(void)
 
     assert(odoo_build_auth(body, sizeof(body)) == -1);
     assert(odoo_build_activities(body, sizeof(body), 1) == -1);
+    assert(odoo_build_count(body, sizeof(body), 1) == -1);
 }
 
 int main(void)
 {
     test_auth_body();
     test_activities_body();
+    test_count_body();
     test_truncation();
     printf("test_odoo_request: OK\n");
     return 0;

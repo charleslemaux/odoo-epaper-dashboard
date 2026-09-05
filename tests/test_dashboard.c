@@ -53,6 +53,7 @@ static void test_banner_and_rows(void)
 
     fill_data(&d, &snap);
     snap.list.count = 1;
+    snap.list.total = 1;
     snprintf(snap.list.items[0].name, 64, "Activite urgente");
     snprintf(snap.list.items[0].deadline, 11, "2026-08-20");
     snprintf(snap.list.items[0].icon, 24, "fa-phone");
@@ -88,6 +89,21 @@ static void test_offline_footer(void)
     assert(region_has(fb, &footer, GFX_RED));
 }
 
+static void test_overflow_footer(void)
+{
+    static uint8_t fb[GFX_BUFFER_SIZE];
+    static struct snapshot snap;
+    struct dashboard_data d;
+    struct gfx_rect corner = {0, 440, 400, 40};
+
+    fill_data(&d, &snap);
+    snap.list.count = 1;
+    snap.list.total = 4;
+    snprintf(snap.list.items[0].name, 64, "Une activite");
+    dashboard_render(fb, &d);
+    assert(region_has(fb, &corner, GFX_BLACK));
+}
+
 static void test_deterministic(void)
 {
     static uint8_t fb1[GFX_BUFFER_SIZE];
@@ -108,6 +124,7 @@ int main(void)
     test_banner_and_rows();
     test_empty_state();
     test_offline_footer();
+    test_overflow_footer();
     test_deterministic();
     printf("test_dashboard: OK\n");
     return 0;

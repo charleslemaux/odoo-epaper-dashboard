@@ -14,6 +14,8 @@ static const char SAMPLE_AUTH[] =
     "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":42}";
 static const char SAMPLE_AUTH_FAIL[] =
     "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":false}";
+static const char SAMPLE_COUNT[] =
+    "{\"jsonrpc\":\"2.0\",\"id\":3,\"result\":23}";
 static const char SAMPLE_ERROR[] = "{\"jsonrpc\":\"2.0\",\"id\":2,"
     "\"error\":{\"code\":200,\"message\":\"Odoo Server Error\"}}";
 static const char SAMPLE_ACTS[] = "{\"jsonrpc\":\"2.0\",\"id\":2,"
@@ -43,7 +45,7 @@ static void test_activities_nominal(void)
     assert(odoo_parse_activities(SAMPLE_ACTS, strlen(SAMPLE_ACTS),
         &list) == 0);
     assert(list.count == 2);
-    assert(list.overflow == 0);
+    assert(list.total == 0);
     assert(strcmp(list.items[0].name, "Rappeler pour le devis") == 0);
     assert(strcmp(list.items[0].record, "Jean Dupont") == 0);
     assert(strcmp(list.items[0].icon, "fa-phone") == 0);
@@ -92,13 +94,24 @@ static void test_overflow(void)
     build_many(json, sizeof(json), 8);
     assert(odoo_parse_activities(json, strlen(json), &list) == 0);
     assert(list.count == 7);
-    assert(list.overflow == 1);
     assert(strcmp(list.items[6].name, "T6") == 0);
+}
+
+static void test_count(void)
+{
+    unsigned int total = 0;
+
+    assert(odoo_parse_count(SAMPLE_COUNT, strlen(SAMPLE_COUNT),
+        &total) == 0);
+    assert(total == 23);
+    assert(odoo_parse_count(SAMPLE_AUTH_FAIL, strlen(SAMPLE_AUTH_FAIL),
+        &total) == -1);
 }
 
 int main(void)
 {
     test_auth();
+    test_count();
     test_activities_nominal();
     test_summary_fallback();
     test_error_and_garbage();

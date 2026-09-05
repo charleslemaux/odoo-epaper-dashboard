@@ -34,6 +34,7 @@ static void fill_acts(struct odoo_activity_list *list)
         "", "2026-08-28 fa-lightbulb-o");
     add_act(&list->items[5], "Preparer la demo",
         "Projet Alpha", "2026-09-05 fa-calendar-check-o");
+    list->total = 11;
 }
 
 static void fill_sample(struct dashboard_data *d, struct snapshot *snap)

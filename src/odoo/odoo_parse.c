@@ -58,19 +58,18 @@ static void parse_activity_array(struct jsmn_ctx const *ctx, int idx,
     struct odoo_activity_list *list)
 {
     int child = idx + 1;
-    int total = ctx->toks[idx].size;
+    int size = ctx->toks[idx].size;
 
-    for (int n = 0; n < total; n++) {
+    for (int n = 0; n < size; n++) {
         if (n < ODOO_MAX_ACTIVITIES)
             parse_activity(ctx, child, &list->items[n]);
         child = jsmn_next_sibling(ctx, child);
     }
-    list->count = total > ODOO_MAX_ACTIVITIES ? ODOO_MAX_ACTIVITIES
-        : (unsigned int)total;
-    list->overflow = total > ODOO_MAX_ACTIVITIES;
+    list->count = size > ODOO_MAX_ACTIVITIES ? ODOO_MAX_ACTIVITIES
+        : (unsigned int)size;
 }
 
-int odoo_parse_auth(char const *json, size_t len, int *uid)
+static int parse_result_int(char const *json, size_t len, int *out)
 {
     static jsmntok_t toks[64];
     struct jsmn_ctx ctx = {json, len, 0, 0};
@@ -85,7 +84,22 @@ int odoo_parse_auth(char const *json, size_t len, int *uid)
     if (json[ctx.toks[val].start] < '0'
         || json[ctx.toks[val].start] > '9')
         return -1;
-    *uid = atoi(json + ctx.toks[val].start);
+    *out = atoi(json + ctx.toks[val].start);
+    return 0;
+}
+
+int odoo_parse_auth(char const *json, size_t len, int *uid)
+{
+    return parse_result_int(json, len, uid);
+}
+
+int odoo_parse_count(char const *json, size_t len, unsigned int *total)
+{
+    int value = 0;
+
+    if (parse_result_int(json, len, &value) != 0 || value < 0)
+        return -1;
+    *total = (unsigned int)value;
     return 0;
 }
 

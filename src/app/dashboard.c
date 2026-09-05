@@ -20,10 +20,10 @@ static void draw_banner(uint8_t *fb, struct dashboard_data const *d)
     char text[24];
 
     gfx_fill_rect(fb, &bar, GFX_GREEN);
-    gfx_text(fb, &title, "MES ACTIVITES");
-    date.x = title.x + gfx_text_width("MES ACTIVITES", 3) + 40;
+    gfx_text(fb, &title, "Planning");
+    date.x = title.x + gfx_text_width("Planning", 3) + 40;
     gfx_text(fb, &date, d->banner_date);
-    snprintf(text, sizeof(text), "%u activites", d->snap->list.count);
+    snprintf(text, sizeof(text), "%u activites", d->snap->list.total);
     count.x = GFX_WIDTH - DASH_MARGIN - gfx_text_width(text, 2);
     gfx_text(fb, &count, text);
 }
@@ -135,8 +135,11 @@ static void draw_footer(uint8_t *fb, struct dashboard_data const *d)
         gfx_text(fb, &left, text);
         return;
     }
-    if (d->snap->list.overflow != 0)
-        gfx_text(fb, &left, "+ d'autres activites");
+    if (d->snap->list.total > d->snap->list.count) {
+        snprintf(text, sizeof(text), "+ d'autres activites (%u)",
+            d->snap->list.total - d->snap->list.count);
+        gfx_text(fb, &left, text);
+    }
 }
 
 static void draw_empty(uint8_t *fb)

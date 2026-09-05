@@ -14,6 +14,7 @@
 #define ODOO_MAX_JSON_TOKENS 512
 
 int odoo_parse_auth(char const *json, size_t len, int *uid);
+int odoo_parse_count(char const *json, size_t len, unsigned int *total);
 int odoo_parse_activities(char const *json, size_t len,
     struct odoo_activity_list *list);
 

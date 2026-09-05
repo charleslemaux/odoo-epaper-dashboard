@@ -33,7 +33,10 @@ right) stays black until the date has passed and turns red once it
 has, joined by a compact red day counter (`8j`). The text has priority
 over the row: if it is too long it is truncated with `...`, otherwise
 the remaining width shows the related record, right-aligned. Bold
-full-width separators divide the rows. The footer shows the timestamp
+full-width separators divide the rows. The banner counter shows the
+real total of scheduled activities (fetched with a `search_count`
+alongside the row query), and when more exist than the seven visible
+rows the footer says how many are hidden: `+ d'autres activites (N)`. The footer shows the timestamp
 of the last *screen update*, not a live clock (a ticking clock would
 force a refresh every minute, defeating the whole point).
 

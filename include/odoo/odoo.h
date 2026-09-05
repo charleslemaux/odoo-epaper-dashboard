@@ -9,7 +9,7 @@
     #define ODOO_H_
 
 #define ODOO_MAX_ACTIVITIES 7
-#define ODOO_FETCH_LIMIT (ODOO_MAX_ACTIVITIES + 1)
+#define ODOO_FETCH_LIMIT ODOO_MAX_ACTIVITIES
 #define ODOO_REQ_CAP 2048
 
 struct odoo_activity {
@@ -21,7 +21,7 @@ struct odoo_activity {
 
 struct odoo_activity_list {
     unsigned int count;
-    unsigned int overflow;
+    unsigned int total;
     struct odoo_activity items[ODOO_MAX_ACTIVITIES];
 };
 
