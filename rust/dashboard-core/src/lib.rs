@@ -9,3 +9,4 @@ pub mod http;
 pub mod icon_data;
 pub mod json;
 pub mod text;
+pub mod time_fmt;
