@@ -2,12 +2,6 @@
 //!
 //! Direct transcription of `src/epd/epd_io.c` + `src/epd/epd_driver.c`
 //! (paced bit-bang SPI transport, mode 0, MSB first) into one module.
-//!
-//! `init`/`display`/`sleep` are not wired into `main` yet (panel safety:
-//! no refresh cycle from the toolchain-check skeleton; the full call sites
-//! land with the application logic in later tasks), so this module is
-//! allowed to look unused from the binary's perspective for now.
-#![allow(dead_code)]
 
 use dashboard_core::gfx::Frame;
 use embassy_rp::gpio::{Input, Level, Output, Pull};
@@ -25,7 +19,7 @@ use crate::config::EPD_CLK_HALF_PERIOD_US;
 /// passed to `watchdog_enable()` in `src/app/main.c` (`watchdog_enable(8000,
 /// 1)`). `embassy_rp::watchdog::Watchdog::feed` takes an explicit timeout
 /// instead, so this constant must track that 8000 ms figure.
-const WDT_RELOAD: Duration = Duration::from_millis(8000);
+pub(crate) const WDT_RELOAD: Duration = Duration::from_millis(8000);
 
 /// `epd_io_wait_idle` timeout used after reset, before the init sequence.
 const SHORT_TIMEOUT_MS: u32 = 5_000;

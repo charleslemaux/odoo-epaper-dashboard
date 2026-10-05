@@ -16,11 +16,6 @@
 //! one-shot call). If the PEM fails to decode, the connection proceeds
 //! unverified and logs a prominent warning rather than failing the request.
 //!
-//! Not yet wired into `main` (T18 drives the poll loop that calls
-//! `post_json`); `#![allow(dead_code)]` mirrors `config.rs`'s precedent for
-//! modules awaiting their call site.
-#![allow(dead_code)]
-
 use dashboard_core::http::{body_offset, build_request, parse_status};
 use dashboard_core::pem;
 use embassy_net::dns::DnsQueryType;
@@ -59,6 +54,10 @@ pub enum NetErr {
 
 #[derive(Debug)]
 pub struct Response<'a> {
+    // Always 200 by the time a `Response` is returned (non-200 is mapped to
+    // `NetErr::Http` in `post_json`); kept for parity with the C firmware's
+    // `http_response.status` and for callers that may want to log it.
+    #[allow(dead_code)]
     pub status: u16,
     pub body: &'a [u8],
 }

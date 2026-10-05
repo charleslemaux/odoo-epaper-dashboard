@@ -8,11 +8,6 @@
 //! only sleep this firmware uses) does not stop `Instant`, so the two
 //! clocks track each other exactly as C's did.
 //!
-//! `now_unix`/`now_local`/`uptime_s` are not wired into `main` yet: the
-//! dashboard poll loop that consumes them for rendering and refresh-timing
-//! arrives in a later task.
-#![allow(dead_code)]
-
 use dashboard_core::time_fmt::{civil_from_days, Date};
 use embassy_time::Instant;
 

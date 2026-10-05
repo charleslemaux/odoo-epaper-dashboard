@@ -6,7 +6,9 @@
 //! (`cyw43_arch_init_with_country` + polling `cyw43_arch_wifi_connect_async`
 //! in a loop), the embassy stack is fully async: `init` brings the chip up
 //! once at boot, and `join` is called repeatedly from `main`'s boot/retry
-//! loop (and later from the superloop's reconnect check).
+//! loop. The superloop itself has no reconnect check (not part of this
+//! port): a dropped association surfaces as repeated `odoo_client::sync`
+//! failures instead.
 use cyw43::{Aligned, Control, JoinOptions, NetDriver, PowerManagementMode, SpiBus, State, A4};
 use cyw43_pio::{PioSpi, DEFAULT_CLOCK_DIVIDER};
 use embassy_executor::Spawner;
