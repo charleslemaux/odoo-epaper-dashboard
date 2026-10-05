@@ -55,6 +55,7 @@ pub fn civil_from_days(z: i64) -> Date {
     }
 }
 
+// rem_euclid(7) bounds the value to 0..7, so the u8 cast cannot truncate.
 #[must_use]
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn weekday(d: Date) -> u8 {
