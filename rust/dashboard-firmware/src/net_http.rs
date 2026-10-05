@@ -169,8 +169,14 @@ async fn open(
 /// Open the connection, send `request`, then read into `resp_buf` until the
 /// peer closes the session (clean TLS close-notify or a bare TCP EOF both
 /// count as "response complete", matching the C firmware's
-/// `cb_recv(p == NULL)`) or `resp_buf` fills. Returns the number of bytes
-/// received.
+/// `cb_recv(p == NULL)`). Returns the number of bytes received.
+///
+/// A response that doesn't fit in `resp_buf` is a hard failure
+/// (`NetErr::Io`), matching the C firmware's `cb_recv` (`copied <
+/// p->tot_len` -> `phase = -3` -> the whole request fails in
+/// `http_client.c`): filling the buffer without having observed a close is
+/// never treated as "response complete", so a truncated body is never
+/// returned as a successful response.
 async fn exchange(
     tls: &mut TlsConnection<'_, TcpSocket<'_>, Aes128GcmSha256>,
     tls_config: &TlsConfig<'_>,
@@ -187,13 +193,27 @@ async fn exchange(
     tls.flush().await.map_err(map_tls_err)?;
 
     let mut received = 0usize;
+    let mut closed = false;
     while received < resp_buf.len() {
         match tls.read(&mut resp_buf[received..]).await {
-            Ok(0) => break,
+            Ok(0) => {
+                closed = true;
+                break;
+            }
             Ok(n) => received += n,
-            Err(TlsError::IoError | TlsError::ConnectionClosed) => break,
+            Err(TlsError::IoError | TlsError::ConnectionClosed) => {
+                closed = true;
+                break;
+            }
             Err(e) => return Err(map_tls_err(e)),
         }
+    }
+    if !closed {
+        // Either the buffer filled without the peer closing, or it filled
+        // on the very read that would have closed next: both look
+        // identical from here (no probe read), and both are treated as
+        // overflow, same as the C firmware.
+        return Err(NetErr::Io);
     }
     Ok(received)
 }
