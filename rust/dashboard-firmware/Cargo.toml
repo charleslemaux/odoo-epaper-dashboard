@@ -20,4 +20,5 @@ embedded-io-async = { version = "0.7" }
 rand_core = { version = "0.6" }
 cyw43 = { version = "0.7", features = ["log"] }
 cyw43-pio = "0.10"
-embassy-net = { version = "0.9", features = ["dhcpv4", "udp", "dns", "proto-ipv4", "medium-ethernet"] }
+embassy-net = { version = "0.9", features = ["dhcpv4", "tcp", "udp", "dns", "proto-ipv4", "medium-ethernet"] }
+embedded-tls = { version = "0.19", default-features = false, features = ["rustpki"] }

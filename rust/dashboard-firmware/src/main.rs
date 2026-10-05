@@ -6,6 +6,7 @@ mod clock;
 mod config;
 mod epd;
 mod net;
+mod net_http;
 mod sntp;
 
 use embassy_executor::Spawner;

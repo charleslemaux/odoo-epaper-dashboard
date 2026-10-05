@@ -11,6 +11,7 @@ pub mod http;
 pub mod icon_data;
 pub mod json;
 pub mod odoo;
+pub mod pem;
 pub mod refresh;
 pub mod text;
 pub mod time_fmt;
