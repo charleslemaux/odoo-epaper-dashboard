@@ -2,9 +2,11 @@
 #![no_std]
 #![no_main]
 
+mod clock;
 mod config;
 mod epd;
 mod net;
+mod sntp;
 
 use embassy_executor::Spawner;
 use embassy_rp::block::ImageDef;
@@ -49,6 +51,18 @@ async fn wifi_boot(
     (stack, control)
 }
 
+/// Port of `main.c`'s `time_boot`: query SNTP every 500 ms until a reply
+/// lands, then anchor the wall clock to it. Log string frozen byte-exact.
+async fn time_boot(stack: embassy_net::Stack<'static>) -> clock::Clock {
+    loop {
+        if let Some(unix_secs) = sntp::query(stack).await {
+            log::info!("time: synced");
+            return clock::Clock::new(unix_secs);
+        }
+        Timer::after_millis(500).await;
+    }
+}
+
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
@@ -70,9 +84,10 @@ async fn main(spawner: Spawner) {
         dma: p.DMA_CH0,
     };
     let (stack, control) = wifi_boot(spawner, wifi_pins).await;
-    // Not yet consumed past boot: SNTP (T16) and the odoo/TLS client (T17)
-    // are the next tasks to drive this handle further.
-    let _ = (&stack, &control);
+    let clock = time_boot(stack).await;
+    // Not yet consumed past boot: the odoo/TLS client (T17) and the
+    // dashboard poll loop (T18) are the next tasks to drive these further.
+    let _ = (&control, &clock);
 
     loop {
         log::info!("epaper_dashboard: toolchain OK");
