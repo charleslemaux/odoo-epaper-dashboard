@@ -5,4 +5,5 @@ pub mod font_data;
 pub mod fonts;
 pub mod gfx;
 pub mod icon_data;
+pub mod json;
 pub mod text;
