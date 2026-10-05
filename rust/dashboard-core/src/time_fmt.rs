@@ -1,4 +1,4 @@
-//! Date formatting and deadline classification (port of src/app/time_fmt.c,
+//! Date formatting and deadline classification (port of `src/app/time_fmt.c`,
 //! with Hinnant civil-date arithmetic replacing mktime/gmtime).
 
 use core::fmt::Write;
@@ -21,6 +21,7 @@ pub enum DeadlineClass {
 
 const DAY_NAMES: [&str; 7] = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"];
 
+#[must_use]
 pub fn days_from_civil(d: Date) -> i64 {
     let y = i64::from(d.year) - i64::from(d.month <= 2);
     let era = if y >= 0 { y } else { y - 399 } / 400;
@@ -31,6 +32,12 @@ pub fn days_from_civil(d: Date) -> i64 {
     era * 146_097 + doe - 719_468
 }
 
+// Hinnant's public-domain civil-date algorithm, ported verbatim from
+// time_fmt.c: day/month/year are always in valid calendar ranges by
+// construction, so these narrowing casts are proven-safe C-parity
+// arithmetic (matching the original's implicit int/unsigned truncation).
+#[must_use]
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn civil_from_days(z: i64) -> Date {
     let z = z + 719_468;
     let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
@@ -48,28 +55,33 @@ pub fn civil_from_days(z: i64) -> Date {
     }
 }
 
+#[must_use]
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn weekday(d: Date) -> u8 {
     (days_from_civil(d) + 4).rem_euclid(7) as u8
 }
 
+#[must_use]
 pub fn banner(d: Date) -> String<16> {
     let mut s = String::new();
     let _ = write!(
         s,
         "{} {:02}/{:02}",
-        DAY_NAMES[weekday(d) as usize],
+        DAY_NAMES[usize::from(weekday(d))],
         d.day,
         d.month
     );
     s
 }
 
+#[must_use]
 pub fn hhmm(hour: u8, minute: u8) -> String<8> {
     let mut s = String::new();
     let _ = write!(s, "{hour:02}:{minute:02}");
     s
 }
 
+#[must_use]
 pub fn ddmm(iso: &str) -> String<8> {
     let mut s = String::new();
     if iso.len() < 10 {
@@ -80,7 +92,10 @@ pub fn ddmm(iso: &str) -> String<8> {
     let _ = write!(
         s,
         "{}{}/{}{}",
-        b[8] as char, b[9] as char, b[5] as char, b[6] as char
+        char::from(b[8]),
+        char::from(b[9]),
+        char::from(b[5]),
+        char::from(b[6])
     );
     s
 }
@@ -96,6 +111,7 @@ fn parse_iso(iso: &str) -> Option<Date> {
     })
 }
 
+#[must_use]
 pub fn days_late(iso: &str, today: Date) -> i64 {
     match parse_iso(iso) {
         Some(due) => days_from_civil(today) - days_from_civil(due),
@@ -103,6 +119,7 @@ pub fn days_late(iso: &str, today: Date) -> i64 {
     }
 }
 
+#[must_use]
 pub fn deadline_class(iso: &str, today: Date) -> DeadlineClass {
     if parse_iso(iso).is_none() {
         return DeadlineClass::None;

@@ -17,6 +17,7 @@ pub struct RefreshTimes {
     pub has_displayed: bool,
 }
 
+#[must_use]
 pub fn refresh_needed(prev: &Snapshot, cur: &Snapshot, t: &RefreshTimes) -> bool {
     if !t.has_displayed {
         return true;

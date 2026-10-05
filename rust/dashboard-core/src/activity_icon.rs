@@ -1,5 +1,5 @@
 //! Mapping from Odoo activity icon classes to embedded icons
-//! (port of src/app/activity_icon.c).
+//! (port of `src/app/activity_icon.c`).
 
 use crate::icon_data::Icon;
 
@@ -22,6 +22,7 @@ const RULES: &[(&str, Icon)] = &[
     ("fa-clock-o", Icon::Clock),
 ];
 
+#[must_use]
 pub fn icon_for(class: &str) -> Icon {
     RULES
         .iter()

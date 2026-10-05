@@ -69,6 +69,29 @@ fn draw_banner(fb: &mut Frame, d: &DashboardData) {
     );
 }
 
+/// x position of a row's right-aligned deadline text, anchored to the
+/// frame's right margin.
+#[must_use]
+pub fn row_date_x(date_width: i32) -> i32 {
+    WIDTH - MARGIN - date_width
+}
+
+/// x position of the "Nj" late-days chip, right-aligned 12px left of `to`
+/// (the row date's left edge, or the frame margin when there is no date).
+#[must_use]
+pub fn chip_x(to: i32, chip_width: i32) -> i32 {
+    to - 12 - chip_width
+}
+
+/// Max width available for the activity name column: the room between the
+/// icon column (`TEXT_X`) and whichever anchor sits to the name's right
+/// (the late chip's x if one was drawn, else the row date's x), less the
+/// `GAP` gutter kept clear before that anchor.
+#[must_use]
+pub fn name_max_width(to: i32) -> i32 {
+    to - GAP - TEXT_X
+}
+
 fn deadline_color(act: &Activity, today: Date) -> Color {
     if time_fmt::deadline_class(&act.deadline, today) == DeadlineClass::Overdue {
         Color::Red
@@ -104,7 +127,7 @@ fn draw_late(fb: &mut Frame, act: &Activity, today: Date, y: i32, to: i32) -> i3
     }
     let mut chip: String<16> = String::new();
     let _ = write!(chip, "{days}j");
-    let x = to - 12 - text::text_width(&chip, 2);
+    let x = chip_x(to, text::text_width(&chip, 2));
     text::text(
         fb,
         &Style {
@@ -148,7 +171,7 @@ fn draw_row(fb: &mut Frame, act: &Activity, y: i32, today: Date) {
         icon_for(&act.icon),
     );
     let ddmm = time_fmt::ddmm(&act.deadline);
-    let date_x = WIDTH - MARGIN - text::text_width(&ddmm, 2);
+    let date_x = row_date_x(text::text_width(&ddmm, 2));
     text::text(
         fb,
         &Style {
@@ -160,7 +183,7 @@ fn draw_row(fb: &mut Frame, act: &Activity, y: i32, today: Date) {
         &ddmm,
     );
     let to = draw_late(fb, act, today, ty, date_x);
-    let Some(name_end) = draw_name(fb, &act.name, ty, to - GAP - TEXT_X) else {
+    let Some(name_end) = draw_name(fb, &act.name, ty, name_max_width(to)) else {
         return;
     };
     let from = name_end + GAP;

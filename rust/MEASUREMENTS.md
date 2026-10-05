@@ -149,3 +149,53 @@ a feature-parity claim — the C firmware has had years of incremental
 size tuning across its own history, while the Rust port has not
 exercised every code path exactly the same way yet (no [HW] validation
 has run against either firmware's serial log in this task).
+
+## Task 21 — idiomatic refactor sweep re-measurement
+
+Phase 2's idiomatic sweep over `dashboard-core` (clippy pedantic enabled
+and every lint fixed or justified-`#[allow]`ed; `gfx::fill_rect`'s
+full-row spans switched from a per-pixel loop to byte-aligned slice
+`fill`; `text::draw_glyph`'s row loop switched to `rows.chunks(stride)` +
+`enumerate`; remaining lossless `as` casts replaced with `From`; three
+pure row-geometry helpers extracted out of `dashboard.rs` with their own
+pinned unit tests) does not touch `dashboard-firmware` or any rendering
+*behavior* — the byte-for-byte parity test
+(`frame_matches_c_renderer_byte_for_byte`) stayed green through every
+step of the sweep, by design. All gates re-run from `rust/` after the
+full sweep, in order (firmware rebuilt from a clean `cargo build
+--release` so the measured binary reflects the sweep, not a stale
+incremental artifact):
+
+| Gate | Result |
+|---|---|
+| `cargo fmt --check` | clean, exit 0 |
+| `cargo clippy --all-targets -- -D warnings` (default-members) | clean, exit 0 |
+| `cargo test` (default-members, incl. parity test — `frame_matches_c_renderer_byte_for_byte`, and the 3 new `dashboard.rs` geometry-helper tests) | all green, exit 0 |
+| `cargo clippy -p dashboard-firmware --target thumbv8m.main-none-eabihf -- -D warnings` | clean, exit 0 |
+| `cargo build --release -p dashboard-firmware --target thumbv8m.main-none-eabihf` | succeeds, exit 0. Same pre-existing benign linker warning as every prior task (`rust-lld: address (0x1000013c) of section .text is not a multiple of alignment (8)`), not new, not `-D warnings`-gated |
+| `picotool uf2 convert` | succeeds, exit 0 |
+
+| Metric | Post-tuning | After idiomatic | Delta |
+|---|---|---|---|
+| UF2 size | 1,039,872 bytes | **1,039,872 bytes** | 0 |
+| ELF size (on disk) | 702,988 bytes | **703,260 bytes** | +272 bytes (+0.04%) |
+| `.text` | 519,688 bytes | **519,904 bytes** | +216 bytes (+0.04%) |
+| `.data` | 8 bytes | **8 bytes** | 0 |
+| `.bss` (static RAM) | 306,956 bytes | **306,956 bytes** | 0 |
+
+Interpretation: the idiomatic sweep is, as expected, size-neutral to
+within noise. The `fill_rect` fast path trades a per-pixel call chain for
+a row-wise `max`/`min`-clamp and a `slice::fill` memset, which is a
+handful more instructions per call site than the +216-byte `.text` delta
+suggests got inlined away by LTO; `draw_glyph`'s `chunks`/`enumerate`
+rewrite compiles down to the same pointer-stride loop the manual
+`row * stride` indexing did. UF2 size is unchanged outright (rounded to
+the same 256-byte-page count), and `.bss`/`.data` are untouched because
+no static buffer size changed. This is the expected outcome for a sweep
+whose explicit goal was idiomatic clarity and a pinned behavioral
+contract (the parity test), not a size win — `fill_rect`'s row-wise fast
+path is a *host-side CPU-time* improvement (fewer bounds-checked
+`pixel()` calls per full-width separator/banner fill), which this
+table's flash/RAM metrics don't capture; no on-target timing harness
+exists yet to measure it directly (see the "poll-cycle duration" rows
+above, still pending hardware validation).

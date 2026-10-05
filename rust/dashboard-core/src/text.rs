@@ -1,4 +1,4 @@
-//! Proportional bitmap text + icon rendering (port of src/gfx/gfx_text.c).
+//! Proportional bitmap text + icon rendering (port of `src/gfx/gfx_text.c`).
 
 use crate::font_data::{FONT_32, FONT_48};
 use crate::fonts::Font;
@@ -15,21 +15,33 @@ fn font_for(scale: u8) -> &'static Font {
 
 fn glyph_index(b: u8) -> usize {
     if (0x20..=0x7e).contains(&b) {
-        (b - 0x20) as usize
+        usize::from(b - 0x20)
     } else {
-        (b'?' - 0x20) as usize
+        usize::from(b'?' - 0x20)
     }
 }
 
+// row (from `.enumerate()`) and col mirror gfx_text.c's `int` loop indices;
+// the usize <-> i32 conversions below are C-parity arithmetic (both are
+// always non-negative by construction: row is bounded by font.height
+// (<=48), col by g.width).
+#[allow(
+    clippy::cast_sign_loss,
+    clippy::cast_possible_wrap,
+    clippy::cast_possible_truncation
+)]
 fn draw_glyph(fb: &mut Frame, st: &Style, font: &Font, gi: usize) {
     let g = &font.glyphs[gi];
-    let stride = (g.width as usize).div_ceil(8);
-    let rows = &font.bitmap[g.offset as usize..];
-    for row in 0..font.height {
-        let r = &rows[row as usize * stride..];
-        for col in 0..g.width as i32 {
-            if (r[(col / 8) as usize] >> (7 - (col % 8))) & 1 == 1 {
-                gfx::pixel(fb, st.x + col, st.y + row, st.color);
+    let stride = usize::from(g.width).div_ceil(8);
+    let width = i32::from(g.width);
+    let color = st.color;
+    let height = font.height as usize;
+    let rows = &font.bitmap[usize::from(g.offset)..];
+    for (row, bits) in rows.chunks(stride).take(height).enumerate() {
+        let y = st.y + row as i32;
+        for col in 0..width {
+            if (bits[(col / 8) as usize] >> (7 - (col % 8))) & 1 == 1 {
+                gfx::pixel(fb, st.x + col, y, color);
             }
         }
     }
@@ -41,22 +53,24 @@ pub fn text(fb: &mut Frame, st: &Style, s: &str) {
     for &b in s.as_bytes() {
         let gi = glyph_index(b);
         draw_glyph(fb, &cur, font, gi);
-        cur.x += font.glyphs[gi].advance as i32;
+        cur.x += i32::from(font.glyphs[gi].advance);
     }
 }
 
+#[must_use]
 pub fn text_width(s: &str, scale: u8) -> i32 {
     let font = font_for(scale);
     s.bytes()
-        .map(|b| font.glyphs[glyph_index(b)].advance as i32)
+        .map(|b| i32::from(font.glyphs[glyph_index(b)].advance))
         .sum()
 }
 
+#[must_use]
 pub fn text_fit(s: &str, scale: u8, max_width: i32) -> usize {
     let font = font_for(scale);
     let mut width = 0;
     for (count, b) in s.bytes().enumerate() {
-        width += font.glyphs[glyph_index(b)].advance as i32;
+        width += i32::from(font.glyphs[glyph_index(b)].advance);
         if width > max_width {
             return count;
         }

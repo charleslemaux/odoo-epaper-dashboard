@@ -121,10 +121,23 @@ fn parse_result_int(json_bytes: &[u8]) -> Result<i64, ParseErr> {
     text.parse().map_err(|_| ParseErr::Malformed)
 }
 
+/// # Errors
+/// Returns [`ParseErr::Malformed`] if `json_bytes` isn't a well-formed
+/// JSON-RPC response with an integer `result` field.
+// uid is an Odoo-assigned database id; narrowing i64 -> i32 mirrors the
+// original C (atoi-style) parsing and is never exercised outside that range
+// in practice (C-parity arithmetic).
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn parse_auth(json_bytes: &[u8]) -> Result<i32, ParseErr> {
     Ok(parse_result_int(json_bytes)? as i32)
 }
 
+/// # Errors
+/// Returns [`ParseErr::Malformed`] if `json_bytes` isn't a well-formed
+/// JSON-RPC response with an integer `result` field.
+// count is an Odoo activity count; narrowing i64 -> u32 mirrors the
+// original C (atoi-style) parsing (C-parity arithmetic).
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn parse_count(json_bytes: &[u8]) -> Result<u32, ParseErr> {
     Ok(parse_result_int(json_bytes)? as u32)
 }
@@ -158,6 +171,10 @@ fn parse_activity(ctx: &Ctx, idx: usize, act: &mut Activity) {
     }
 }
 
+/// # Errors
+/// Returns [`ParseErr::Odoo`] if the response carries an `error` field, or
+/// [`ParseErr::Malformed`] if it isn't a well-formed JSON-RPC response with
+/// an array `result` field.
 pub fn parse_activities(json_bytes: &[u8], list: &mut ActivityList) -> Result<(), ParseErr> {
     let mut toks = [Token::EMPTY; MAX_JSON_TOKENS];
     *list = ActivityList::default();
@@ -181,6 +198,10 @@ pub fn parse_activities(json_bytes: &[u8], list: &mut ActivityList) -> Result<()
         }
         child = ctx.next_sibling(child);
     }
-    list.count = total.min(MAX_ACTIVITIES) as u32;
+    // Clamped to MAX_ACTIVITIES (7) just above, so this always fits u32.
+    #[allow(clippy::cast_possible_truncation)]
+    {
+        list.count = total.min(MAX_ACTIVITIES) as u32;
+    }
     Ok(())
 }

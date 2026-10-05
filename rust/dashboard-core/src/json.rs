@@ -1,5 +1,5 @@
 //! JSON tokenizer (jsmn port) and string folding to ASCII
-//! (port of src/json/jsmn_util.c and src/json/json_str.c).
+//! (port of `src/json/jsmn_util.c` and `src/json/json_str.c`).
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum TokKind {
@@ -28,7 +28,13 @@ impl Token {
 
 const OPEN: usize = usize::MAX;
 
-#[allow(clippy::result_unit_err)]
+/// # Errors
+/// Returns `Err(())` if `json` is malformed (unbalanced braces/brackets,
+/// an unterminated string) or if `toks` is too small to hold every token.
+// Direct port of jsmn's single state-machine loop (jsmn_util.c); splitting
+// it into helpers would obscure the C parity for a lint about line count,
+// not correctness.
+#[allow(clippy::result_unit_err, clippy::too_many_lines)]
 pub fn parse(json: &[u8], toks: &mut [Token]) -> Result<usize, ()> {
     let mut count = 0usize;
     let mut toksuper: Option<usize> = None;
@@ -170,14 +176,17 @@ pub struct Ctx<'a> {
 }
 
 impl Ctx<'_> {
+    #[must_use]
     pub fn bytes(&self, idx: usize) -> &[u8] {
         &self.json[self.toks[idx].start..self.toks[idx].end]
     }
 
+    #[must_use]
     pub fn tok_eq(&self, idx: usize, s: &str) -> bool {
         self.toks[idx].kind == TokKind::Str && self.bytes(idx) == s.as_bytes()
     }
 
+    #[must_use]
     pub fn next_sibling(&self, idx: usize) -> usize {
         let end = self.toks[idx].end;
         let mut i = idx + 1;
@@ -187,6 +196,7 @@ impl Ctx<'_> {
         i
     }
 
+    #[must_use]
     pub fn find_key(&self, key: &str) -> Option<usize> {
         if self.toks.is_empty() || self.toks[0].kind != TokKind::Object {
             return None;
@@ -242,16 +252,16 @@ const FOLD_TABLE: &[(u32, &str)] = &[
 
 fn hex_val(c: u8) -> Option<u32> {
     match c {
-        b'0'..=b'9' => Some((c - b'0') as u32),
-        b'a'..=b'f' => Some((c - b'a' + 10) as u32),
-        b'A'..=b'F' => Some((c - b'A' + 10) as u32),
+        b'0'..=b'9' => Some(u32::from(c - b'0')),
+        b'a'..=b'f' => Some(u32::from(c - b'a' + 10)),
+        b'A'..=b'F' => Some(u32::from(c - b'A' + 10)),
         _ => None,
     }
 }
 
 fn decode_escape(src: &[u8]) -> (usize, u32) {
     if src.is_empty() {
-        return (0, b'?' as u32);
+        return (0, u32::from(b'?'));
     }
     if src[0] == b'u' {
         if src.len() >= 5 {
@@ -259,17 +269,17 @@ fn decode_escape(src: &[u8]) -> (usize, u32) {
             for &b in &src[1..5] {
                 match hex_val(b) {
                     Some(v) => value = (value << 4) | v,
-                    None => return (src.len().min(5), b'?' as u32),
+                    None => return (src.len().min(5), u32::from(b'?')),
                 }
             }
             return (5, value);
         }
-        return (src.len().min(5), b'?' as u32);
+        return (src.len().min(5), u32::from(b'?'));
     }
     match src[0] {
-        b'n' | b'r' | b't' => (1, b' ' as u32),
-        b'"' | b'\\' | b'/' => (1, src[0] as u32),
-        _ => (1, b'?' as u32),
+        b'n' | b'r' | b't' => (1, u32::from(b' ')),
+        b'"' | b'\\' | b'/' => (1, u32::from(src[0])),
+        _ => (1, u32::from(b'?')),
     }
 }
 
@@ -290,18 +300,18 @@ fn utf8_len(lead: u8) -> usize {
 fn decode_utf8(src: &[u8]) -> (usize, u32) {
     let lead = src[0];
     if lead < 0x80 {
-        return (1, lead as u32);
+        return (1, u32::from(lead));
     }
     let need = utf8_len(lead);
     if need == 0 || need > src.len() {
-        return (1, b'?' as u32);
+        return (1, u32::from(b'?'));
     }
-    let mut value = (lead as u32) & (0xff >> (need + 1));
+    let mut value = u32::from(lead) & (0xff >> (need + 1));
     for &b in &src[1..need] {
         if b & 0xc0 != 0x80 {
-            return (1, b'?' as u32);
+            return (1, u32::from(b'?'));
         }
-        value = (value << 6) | (b as u32 & 0x3f);
+        value = (value << 6) | (u32::from(b) & 0x3f);
     }
     (need, value)
 }
@@ -323,6 +333,9 @@ impl Out<'_> {
 
     fn push_cp(&mut self, cp: u32) {
         if (0x20..0x7f).contains(&cp) {
+            // cp is range-checked to ASCII just above; the truncation is
+            // provably safe (C-parity arithmetic, as in json_str.c).
+            #[allow(clippy::cast_possible_truncation)]
             self.push(cp as u8);
             return;
         }

@@ -1,4 +1,4 @@
-//! PEM -> DER decoding for pinned CA certificates (no_std, zero-alloc).
+//! PEM -> DER decoding for pinned CA certificates (`no_std`, zero-alloc).
 //!
 //! `config::ODOO_CA_CERT` is stored as a PEM string (like the C firmware's
 //! `ODOO_CA_CERT`), but `embedded-tls`'s `rustpki` certificate verifier
@@ -50,7 +50,13 @@ pub fn pem_to_der(pem: &str, out: &mut [u8]) -> Option<usize> {
             if out_len >= out.len() {
                 return None;
             }
-            out[out_len] = (acc >> bits) as u8;
+            // Intentional truncation to the low byte of the shift
+            // accumulator - this is exactly how base64 byte extraction
+            // works (bits [bits, bits+8) of acc, discarding the rest).
+            #[allow(clippy::cast_possible_truncation)]
+            {
+                out[out_len] = (acc >> bits) as u8;
+            }
             out_len += 1;
         }
     }

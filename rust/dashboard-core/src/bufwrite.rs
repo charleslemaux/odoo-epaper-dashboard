@@ -1,4 +1,4 @@
-//! core::fmt::Write over a fixed byte slice (replaces C snprintf).
+//! `core::fmt::Write` over a fixed byte slice (replaces C snprintf).
 
 use core::fmt;
 
@@ -12,10 +12,12 @@ impl<'a> SliceWriter<'a> {
         SliceWriter { buf, pos: 0 }
     }
 
+    #[must_use]
     pub fn len(&self) -> usize {
         self.pos
     }
 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.pos == 0
     }
