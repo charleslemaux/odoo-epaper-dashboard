@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["dashboard-core", "host-tools"]
+members = ["dashboard-core", "host-tools", "dashboard-firmware"]
 default-members = ["dashboard-core", "host-tools"]
 
 [workspace.dependencies]

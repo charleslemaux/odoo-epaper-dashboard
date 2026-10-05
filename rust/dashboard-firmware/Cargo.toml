@@ -1,0 +1,20 @@
+[package]
+name = "dashboard-firmware"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dashboard-core = { path = "../dashboard-core" }
+
+embassy-executor = { version = "0.10", features = ["platform-cortex-m", "executor-thread"] }
+embassy-time = { version = "0.5" }
+embassy-rp = { version = "0.10", features = ["rp235xa", "time-driver", "critical-section-impl"] }
+embassy-usb = { version = "0.6" }
+embassy-usb-logger = { version = "0.6" }
+log = { version = "0.4" }
+heapless = { workspace = true }
+static_cell = { version = "2" }
+cortex-m = { version = "0.7" }
+cortex-m-rt = { version = "0.7" }
+embedded-io-async = { version = "0.7" }
+rand_core = { version = "0.6" }

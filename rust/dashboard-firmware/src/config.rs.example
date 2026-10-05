@@ -1,0 +1,17 @@
+//! Copy to src/config.rs (gitignored) and fill in real values.
+#![allow(dead_code)]
+
+pub const WIFI_SSID: &str = "MyNetwork";
+pub const WIFI_PASSWORD: &str = "MyPassword";
+pub const WIFI_COUNTRY: &str = "FR";
+pub const ODOO_HOST: &str = "odoo.example.com";
+pub const ODOO_PORT: u16 = 443;
+pub const ODOO_DB: &str = "mydb";
+pub const ODOO_LOGIN: &str = "me@example.com";
+pub const ODOO_API_KEY: &str = "paste-api-key-here";
+pub const ODOO_ACTIVITY_DOMAIN: &str = "[[\"user_id\",\"=\",%d]]";
+pub const POLL_INTERVAL_S: u32 = 300;
+pub const NTP_SERVER: &str = "pool.ntp.org";
+pub const TZ_OFFSET_MIN: i32 = 120;
+pub const EPD_CLK_HALF_PERIOD_US: u32 = 1;
+pub const ODOO_CA_CERT: Option<&str> = None;
