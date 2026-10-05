@@ -3,6 +3,7 @@
 
 pub mod activity_icon;
 pub mod bufwrite;
+pub mod dashboard;
 pub mod font_data;
 pub mod fonts;
 pub mod gfx;
