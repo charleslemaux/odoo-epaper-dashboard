@@ -5,10 +5,9 @@
 //! the configured access point with a DHCP lease. Unlike the C driver
 //! (`cyw43_arch_init_with_country` + polling `cyw43_arch_wifi_connect_async`
 //! in a loop), the embassy stack is fully async: `init` brings the chip up
-//! once at boot, and `join` is called repeatedly from `main`'s boot/retry
-//! loop. The superloop itself has no reconnect check (not part of this
-//! port): a dropped association surfaces as repeated `odoo_client::sync`
-//! failures instead.
+//! once at boot, `join` is called repeatedly from `main`'s boot/retry loop,
+//! and `is_up` backs the superloop's one-shot silent rejoin (port of
+//! `net_wifi_up`/`poll_once`'s reconnect check).
 use cyw43::{Aligned, Control, JoinOptions, NetDriver, PowerManagementMode, SpiBus, State, A4};
 use cyw43_pio::{PioSpi, DEFAULT_CLOCK_DIVIDER};
 use embassy_executor::Spawner;
@@ -119,4 +118,13 @@ pub async fn join(control: &mut Control<'static>, stack: Stack<'static>) -> bool
         Some(())
     };
     matches!(with_timeout(JOIN_TIMEOUT, attempt).await, Ok(Some(())))
+}
+
+/// Is the association still up? Port of `net_wifi_up`: link associated
+/// *and* a valid IP configuration (DHCP lease) still held. Sanctioned
+/// addition (code review, T18 fix-up) so the superloop can attempt one
+/// silent rejoin when it isn't, mirroring C's `poll_once`
+/// (`if (net_wifi_up() == 0) net_wifi_connect();`).
+pub fn is_up(stack: Stack<'static>) -> bool {
+    stack.is_link_up() && stack.is_config_up()
 }

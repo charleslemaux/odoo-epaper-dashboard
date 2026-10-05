@@ -11,9 +11,11 @@ mod odoo_client;
 mod panic_log;
 mod sntp;
 
+use core::pin::pin;
 use core::ptr::addr_of_mut;
 
 use embassy_executor::Spawner;
+use embassy_futures::select::{select, Either};
 use embassy_net::Stack;
 use embassy_rp::block::ImageDef;
 use embassy_rp::usb::{Driver, InterruptHandler};
@@ -83,6 +85,31 @@ async fn idle_ms(wdt: &mut Watchdog, ms: u32) {
     }
 }
 
+/// Feed the watchdog while `fut` is pending, so a merely-slow network
+/// operation inside its own legitimate budget (`net::join`'s 30 s,
+/// `sntp::query`'s 10 s, `net_http::post_json`'s 10+15+30 s DNS/connect/
+/// exchange budgets inside `odoo_client::sync`) never looks like a hung
+/// executor to the 8 s watchdog — matching the C firmware, which fed every
+/// 5-50 ms from inside these same waits (`net_wifi.c`, `http_conn.c`).
+///
+/// Races `fut` against a 1 s `Timer` in a loop: every tick feeds
+/// `WDT_RELOAD` and re-arms the timer; the first time `fut` itself
+/// resolves, its output is returned (the still-pending timer is dropped).
+/// A genuine executor hang (nothing scheduled at all, this future included)
+/// still reboots, since feeding only happens while this future is actually
+/// being polled. Each wrapped operation's own `with_timeout` still bounds
+/// how long it can run; this only prevents a slow-but-still-within-budget
+/// wait from starving the watchdog.
+async fn fed<F: core::future::Future>(wdt: &mut Watchdog, fut: F) -> F::Output {
+    let mut fut = pin!(fut);
+    loop {
+        match select(fut.as_mut(), Timer::after_secs(1)).await {
+            Either::First(out) => return out,
+            Either::Second(()) => wdt.feed(WDT_RELOAD),
+        }
+    }
+}
+
 /// Port of `main.c`'s `wifi_boot`: join with exponential backoff (5 s
 /// doubling to an 80 s cap) until connected. Log strings are frozen
 /// byte-exact to match the C firmware's serial output. `net::init`'s
@@ -97,7 +124,7 @@ async fn wifi_boot(
 ) {
     let mut backoff: u32 = 5_000;
 
-    while !net::join(control, stack).await {
+    while !fed(wdt, net::join(control, stack)).await {
         log::info!("wifi: retry in {} ms", backoff);
         idle_ms(wdt, backoff).await;
         backoff = if backoff < 80_000 {
@@ -113,7 +140,7 @@ async fn wifi_boot(
 /// lands, then anchor the wall clock to it. Log string frozen byte-exact.
 async fn time_boot(stack: Stack<'static>, wdt: &mut Watchdog) -> Clock {
     loop {
-        if let Some(unix_secs) = sntp::query(stack).await {
+        if let Some(unix_secs) = fed(wdt, sntp::query(stack)).await {
             log::info!("time: synced");
             return Clock::new(unix_secs);
         }
@@ -188,25 +215,40 @@ fn apply_refresh(
     app.has_displayed = true;
 }
 
-/// Port of `poll_once`: sync with Odoo, note the result, and refresh the
-/// panel if the refresh policy says the change (or age) warrants it.
+/// Port of `poll_once`: if the association dropped, attempt one silent
+/// rejoin; sync with Odoo, note the result, and refresh the panel if the
+/// refresh policy says the change (or age) warrants it.
 #[allow(clippy::too_many_arguments)]
 async fn poll_once(
     stack: Stack<'static>,
     rng: &mut embassy_rp::trng::Trng<'static, embassy_rp::peripherals::TRNG>,
+    control: &mut cyw43::Control<'static>,
     epd: &mut Epd<'static>,
     wdt: &mut Watchdog,
     clock: &Clock,
     fb: &mut Frame,
     app: &mut App,
 ) {
+    // Port of `poll_once`'s `if (net_wifi_up() == 0) net_wifi_connect();`:
+    // one silent rejoin attempt (no new log strings, matching C) when the
+    // association has dropped. Result is ignored either way — if it's
+    // still down, `odoo_client::sync` below will fail and the existing
+    // failure-streak/offline bookkeeping in `note_result` takes over.
+    if !net::is_up(stack) {
+        let _ = fed(wdt, net::join(control, stack)).await;
+    }
+
     let times = RefreshTimes {
         now_s: clock.uptime_s(),
         last_refresh_s: app.last_refresh_s,
         has_displayed: app.has_displayed,
     };
 
-    let ok = odoo_client::sync(stack, rng, &mut app.uid, &mut app.current.list).await;
+    let ok = fed(
+        wdt,
+        odoo_client::sync(stack, rng, &mut app.uid, &mut app.current.list),
+    )
+    .await;
     note_result(app, ok, clock);
     if !ok && app.fails < 3 {
         return;
@@ -252,7 +294,17 @@ async fn main(spawner: Spawner) {
     let app = APP.init(App::default());
 
     loop {
-        poll_once(stack, &mut rng, &mut epd, &mut wdt, &clock, fb, app).await;
+        poll_once(
+            stack,
+            &mut rng,
+            &mut control,
+            &mut epd,
+            &mut wdt,
+            &clock,
+            fb,
+            app,
+        )
+        .await;
         idle_ms(&mut wdt, POLL_INTERVAL_S * 1000).await;
     }
 }
