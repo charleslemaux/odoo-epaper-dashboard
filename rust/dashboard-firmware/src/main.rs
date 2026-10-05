@@ -4,6 +4,7 @@
 
 mod config;
 mod epd;
+mod net;
 
 use embassy_executor::Spawner;
 use embassy_rp::block::ImageDef;
@@ -24,6 +25,30 @@ async fn logger_task(driver: Driver<'static, USB>) {
     embassy_usb_logger::run!(1024, log::LevelFilter::Info, driver);
 }
 
+/// Port of `main.c`'s `wifi_boot`: bring the radio up, then join with
+/// exponential backoff (5 s doubling to an 80 s cap) until connected.
+/// Log strings are frozen byte-exact to match the C firmware's serial
+/// output.
+async fn wifi_boot(
+    spawner: Spawner,
+    pins: net::WifiPins,
+) -> (embassy_net::Stack<'static>, cyw43::Control<'static>) {
+    let (stack, mut control) = net::init(spawner, pins).await;
+    let mut backoff: u32 = 5_000;
+
+    while !net::join(&mut control, stack).await {
+        log::info!("wifi: retry in {} ms", backoff);
+        Timer::after_millis(backoff as u64).await;
+        backoff = if backoff < 80_000 {
+            backoff * 2
+        } else {
+            80_000
+        };
+    }
+    log::info!("wifi: connected");
+    (stack, control)
+}
+
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
@@ -35,6 +60,19 @@ async fn main(spawner: Spawner) {
     // cycle from the toolchain-check skeleton).
     let mut epd = epd::Epd::new(p.PIN_12, p.PIN_8, p.PIN_9, p.PIN_10, p.PIN_11, p.PIN_13);
     let _ = &mut epd;
+
+    let wifi_pins = net::WifiPins {
+        pwr: p.PIN_23,
+        cs: p.PIN_25,
+        pio: p.PIO0,
+        dio: p.PIN_24,
+        clk: p.PIN_29,
+        dma: p.DMA_CH0,
+    };
+    let (stack, control) = wifi_boot(spawner, wifi_pins).await;
+    // Not yet consumed past boot: SNTP (T16) and the odoo/TLS client (T17)
+    // are the next tasks to drive this handle further.
+    let _ = (&stack, &control);
 
     loop {
         log::info!("epaper_dashboard: toolchain OK");

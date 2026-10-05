@@ -9,3 +9,4 @@ CMakeLists.txt text eol=lf
 *.rs text eol=lf
 *.toml text eol=lf
 *.raw -text
+*.bin -text
