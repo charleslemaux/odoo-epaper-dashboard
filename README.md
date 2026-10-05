@@ -1,5 +1,14 @@
 # Odoo e-Paper Dashboard — Pico 2 W, C firmware
 
+## Rust rewrite (feat/rust-rewrite)
+
+A ground-up Rust port of this firmware (Embassy, RP2350) is in
+progress on the `feat/rust-rewrite` branch, under `rust/` — see
+[`rust/README.md`](rust/README.md) for its build/test/flash
+instructions. It is not yet the shipping firmware: **this `main`
+branch's C firmware below remains what you should build and flash**
+until the Rust port is validated on hardware and formally promoted.
+
 Bare-metal C rewrite (Pico SDK, no OS, no dynamic allocation in project
 code) of a MicroPython prototype. A Raspberry Pi Pico 2 W joins your WiFi,
 authenticates against a self-hosted Odoo instance over HTTPS, and shows
