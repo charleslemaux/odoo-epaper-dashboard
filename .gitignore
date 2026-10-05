@@ -12,3 +12,7 @@ __pycache__/
 .vscode/
 tests/preview.raw
 result.json
+
+# Rust
+rust/target/
+rust/dashboard-firmware/src/config.rs

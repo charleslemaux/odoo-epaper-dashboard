@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = ["dashboard-core", "host-tools"]
+default-members = ["dashboard-core", "host-tools"]
+
+[workspace.dependencies]
+heapless = "0.8"
