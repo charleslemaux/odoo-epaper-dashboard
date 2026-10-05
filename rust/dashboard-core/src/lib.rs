@@ -8,5 +8,6 @@ pub mod gfx;
 pub mod http;
 pub mod icon_data;
 pub mod json;
+pub mod odoo;
 pub mod text;
 pub mod time_fmt;
