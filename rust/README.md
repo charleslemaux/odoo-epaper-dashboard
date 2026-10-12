@@ -240,6 +240,15 @@ once it shows up as a mass-storage drive (`RP2350`), then drag-and-drop
 firmware's `build/epaper_dashboard.uf2`. The board reboots and starts
 running automatically.
 
+**Reflash without the button**: once this firmware is running, send the
+exact text `BOOTSEL` to its USB serial port (any baud) and the board
+reboots straight into the `RP2350` mass-storage bootloader — no
+physical button press. This exists because the deployed Pico sits
+inside its 3D-printed case where BOOTSEL is unreachable (the button is
+only needed for the very first flash, or to recover from a firmware
+that wedges before USB comes up — for that, `hardware/README.md`'s
+"slide the lid out" procedure still applies).
+
 Open a serial monitor at **115200 baud** on the Pico's USB serial port
 (the firmware uses `embassy-usb-logger` over the same USB CDC-ACM
 interface, not the SWD/debug UART) to watch the boot log — see section
@@ -252,6 +261,19 @@ embassy-rs/embassy upstream repository and embedded at compile time
 via `include_bytes!` — no separate flashing step for them. They carry
 Infineon/Cypress's Permissive Binary License 1.0; see
 `dashboard-firmware/cyw43-firmware/LICENSE-permissive-binary-license-1.0.txt`.
+
+A third blob, `43439A0_nvram.bin`, is the radio's **NVRAM** (board
+config: crystal frequency, PA tables, gSPI setup), extracted
+byte-for-byte from pico-sdk's `cyw43-driver`
+`firmware/wifi_nvram_43439.h` — the identical bytes the C firmware
+loads. `cyw43 0.7`'s `cyw43::new()` takes it as its fifth parameter;
+it is **not** the CLM blob (that one is loaded separately by
+`Control::init`). Passing the wrong bytes there is invisible to every
+host-side gate — it type-checks and links — and on hardware the WLAN
+core simply never comes up, so `cyw43::new()` hangs forever and the
+8 s watchdog reboot-loops the board with nothing ever logged. This was
+the one bug in the entire port that only the first real [HW] flash
+could catch.
 
 ## 6. Log expectations
 
@@ -289,6 +311,18 @@ conditions:
   reset, then forces an immediate watchdog reset; the next boot's
   `panic_log::report()` call reads it, logs it exactly once, and
   clears it so it is never reported twice.
+
+Two **benign** lines from the `cyw43` driver itself (not part of the
+frozen C log set; observed on real hardware, harmless):
+
+- `BDC event, incomplete header` — a couple of these during radio
+  bring-up, before `wifi: connected`.
+- `failed to push rxd packet to the channel.` — a burst of these
+  during each panel refresh: the ~35 s bit-bang refresh blocks the
+  executor (a faithful port of the C superloop, which equally starved
+  lwIP during refreshes), so inbound WiFi packets are dropped until it
+  finishes. The C firmware did the same thing silently; the Rust
+  driver just logs it.
 
 ## 7. Crate choices, versions, and the pinning/reconciliation policy
 
