@@ -41,9 +41,40 @@ bind_interrupts!(struct Irqs {
     USBCTRL_IRQ => InterruptHandler<USB>;
 });
 
+/// Serial-side escape hatch: the Pico sits sealed inside its printed case,
+/// so the physical BOOTSEL button is unreachable once assembled. Receiving
+/// the token `BOOTSEL` on the USB serial port reboots into the ROM's UF2
+/// bootloader, so the firmware can be reflashed without opening the case.
+struct BootselHandler;
+
+impl embassy_usb_logger::ReceiverHandler for BootselHandler {
+    async fn handle_data(&self, data: &[u8]) {
+        if data.windows(7).any(|w| w == b"BOOTSEL") {
+            embassy_rp::rom_data::reset_to_usb_boot(0, 0);
+        }
+    }
+
+    fn new() -> Self {
+        Self
+    }
+}
+
+/// Hand-rolled expansion of `embassy_usb_logger::run!` (the macro hardcodes
+/// `DummyHandler`; installing a `ReceiverHandler` needs the long form).
 #[embassy_executor::task]
 async fn logger_task(driver: Driver<'static, USB>) {
-    embassy_usb_logger::run!(1024, log::LevelFilter::Info, driver);
+    static LOGGER: StaticCell<embassy_usb_logger::UsbLogger<1024, BootselHandler>> =
+        StaticCell::new();
+    let logger = LOGGER.init(embassy_usb_logger::UsbLogger::new());
+    logger.with_handler(BootselHandler);
+    let logger: &'static embassy_usb_logger::UsbLogger<1024, BootselHandler> = logger;
+    unsafe {
+        let _ =
+            log::set_logger_racy(logger).map(|()| log::set_max_level_racy(log::LevelFilter::Info));
+    }
+    logger
+        .run(&mut embassy_usb_logger::LoggerState::new(), driver)
+        .await;
 }
 
 /// Top-level application state owned by `main`'s superloop (port of
