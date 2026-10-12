@@ -1,8 +1,7 @@
 * text=auto
-*.c text eol=lf
-*.h text eol=lf
 *.md text eol=lf
 *.py text eol=lf
-Makefile text eol=lf
-CMakeLists.txt text eol=lf
-*.cmake text eol=lf
+*.rs text eol=lf
+*.toml text eol=lf
+*.raw -text
+*.bin -text

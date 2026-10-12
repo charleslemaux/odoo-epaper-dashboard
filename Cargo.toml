@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = ["dashboard-core", "host-tools", "dashboard-firmware"]
+default-members = ["dashboard-core", "host-tools"]
+
+[workspace.dependencies]
+heapless = "0.8"
+
+[profile.release]
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"

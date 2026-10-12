@@ -1,14 +1,13 @@
 # Credentials — never commit
-include/config.h
+dashboard-firmware/src/config.rs
 
 # Build output
-build/
-tests/*.exe
+target/
+*.uf2
 
 # Session/tooling artifacts
 .remember/
 *.pyc
 __pycache__/
 .vscode/
-tests/preview.raw
 result.json
