@@ -33,11 +33,11 @@ Commands used:
 (Get-Item build\epaper_dashboard.elf).Length                                        # 2816796
 & "$env:PICO_TOOLCHAIN_PATH\arm-none-eabi-size.exe" build\epaper_dashboard.elf
 
-(Get-Item rust\target\thumbv8m.main-none-eabihf\release\dashboard-firmware).Length   # 908844
-& "$env:PICO_TOOLCHAIN_PATH\arm-none-eabi-size.exe" rust\target\thumbv8m.main-none-eabihf\release\dashboard-firmware
+(Get-Item target\thumbv8m.main-none-eabihf\release\dashboard-firmware).Length   # 908844
+& "$env:PICO_TOOLCHAIN_PATH\arm-none-eabi-size.exe" target\thumbv8m.main-none-eabihf\release\dashboard-firmware
 & "C:\Users\charl\picotool-install\bin\picotool.exe" uf2 convert `
-    rust\target\thumbv8m.main-none-eabihf\release\dashboard-firmware `
-    -t elf rust\dashboard-firmware.uf2                                              # 1308672
+    target\thumbv8m.main-none-eabihf\release\dashboard-firmware `
+    -t elf dashboard-firmware.uf2                                              # 1308672
 ```
 
 Notes:
@@ -64,7 +64,7 @@ Notes:
 
 ## Release profile tuning
 
-Added to the workspace root `rust/Cargo.toml` (profiles are rejected
+Added to the workspace root `Cargo.toml` (profiles are rejected
 on non-root packages by Cargo — this **must** live at the workspace
 root, not `dashboard-firmware/Cargo.toml`):
 
@@ -106,7 +106,7 @@ dashboard-firmware` succeeds; no scoping to firmware-only was needed.
 
 ## Post-tuning re-measurement
 
-All gates re-run from `rust/` after the profile change, in order
+All gates re-run from the repo root after the profile change, in order
 (firmware rebuilt from a clean `cargo build --release` so the measured
 binary reflects the new profile, not a stale incremental artifact):
 
@@ -161,7 +161,7 @@ pure row-geometry helpers extracted out of `dashboard.rs` with their own
 pinned unit tests) does not touch `dashboard-firmware` or any rendering
 *behavior* — the byte-for-byte parity test
 (`frame_matches_c_renderer_byte_for_byte`) stayed green through every
-step of the sweep, by design. All gates re-run from `rust/` after the
+step of the sweep, by design. All gates re-run from the repo root after the
 full sweep, in order (firmware rebuilt from a clean `cargo build
 --release` so the measured binary reflects the sweep, not a stale
 incremental artifact):
