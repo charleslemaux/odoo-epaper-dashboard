@@ -41,6 +41,14 @@ static FIRMWARE: Aligned<A4, [u8; include_bytes!("../cyw43-firmware/43439A0.bin"
     Aligned(*include_bytes!("../cyw43-firmware/43439A0.bin"));
 static CLM: Aligned<A4, [u8; include_bytes!("../cyw43-firmware/43439A0_clm.bin").len()]> =
     Aligned(*include_bytes!("../cyw43-firmware/43439A0_clm.bin"));
+// Radio NVRAM (board config: xtal frequency, PA tables, gSPI setup) for the
+// Pico (2) W's CYW43439 module, extracted byte-for-byte from pico-sdk's
+// cyw43-driver `wifi_nvram_43439.h` — the same config the C firmware loads.
+// `cyw43::new`'s fifth parameter wants THIS, not the CLM blob (the CLM is
+// loaded separately via `Control::init` below); with anything else written
+// to the NVRAM area the WLAN core never comes up and `new` hangs forever.
+static NVRAM: Aligned<A4, [u8; include_bytes!("../cyw43-firmware/43439A0_nvram.bin").len()]> =
+    Aligned(*include_bytes!("../cyw43-firmware/43439A0_nvram.bin"));
 
 type Cyw43Bus = SpiBus<Output<'static>, PioSpi<'static, PIO0, 0>>;
 
@@ -85,7 +93,7 @@ pub async fn init(spawner: Spawner, pins: WifiPins) -> (Stack<'static>, Control<
         dma,
     );
 
-    let (net_device, mut control, runner) = cyw43::new(state, pwr, spi, &FIRMWARE, &CLM).await;
+    let (net_device, mut control, runner) = cyw43::new(state, pwr, spi, &FIRMWARE, &NVRAM).await;
     spawner.spawn(cyw43_task(runner).unwrap());
 
     control.init(&*CLM).await;
