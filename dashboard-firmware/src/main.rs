@@ -27,7 +27,7 @@ use static_cell::StaticCell;
 use dashboard_core::dashboard::{self, DashboardData};
 use dashboard_core::gfx::{Frame, BUFFER_SIZE};
 use dashboard_core::refresh::{refresh_needed, RefreshTimes, Snapshot};
-use dashboard_core::time_fmt::{banner, hhmm};
+use dashboard_core::time_fmt::{banner, hhmm, Date};
 
 use crate::clock::Clock;
 use crate::config::POLL_INTERVAL_S;
@@ -91,6 +91,8 @@ struct App {
     fails: u32,
     has_displayed: bool,
     last_refresh_s: u32,
+    /// Local date the panel was last drawn for (drives the midnight redraw).
+    displayed_day: Option<Date>,
     offline_since: heapless::String<8>,
 }
 
@@ -219,7 +221,8 @@ fn display_frame(epd: &mut Epd<'static>, fb: &Frame, wdt: &mut Watchdog) -> bool
 
 /// Port of `apply_refresh`: render the current snapshot into the
 /// framebuffer and push it to the panel; `displayed`/`last_refresh_s`/
-/// `has_displayed` only advance once the panel actually accepted the frame.
+/// `displayed_day`/`has_displayed` only advance once the panel actually
+/// accepted the frame.
 fn apply_refresh(
     app: &mut App,
     fb: &mut Frame,
@@ -243,12 +246,14 @@ fn apply_refresh(
     }
     app.displayed = app.current.clone();
     app.last_refresh_s = clock.uptime_s();
+    app.displayed_day = Some(today);
     app.has_displayed = true;
 }
 
 /// Port of `poll_once`: if the association dropped, attempt one silent
 /// rejoin; sync with Odoo, note the result, and refresh the panel if the
-/// refresh policy says the change (or age) warrants it.
+/// refresh policy says the change (list, offline state or local date) or
+/// age warrants it.
 #[allow(clippy::too_many_arguments)]
 async fn poll_once(
     stack: Stack<'static>,
@@ -273,6 +278,8 @@ async fn poll_once(
         now_s: clock.uptime_s(),
         last_refresh_s: app.last_refresh_s,
         has_displayed: app.has_displayed,
+        displayed_day: app.displayed_day,
+        today: clock.now_local().0,
     };
 
     let ok = fed(

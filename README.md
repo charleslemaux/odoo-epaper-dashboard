@@ -10,9 +10,10 @@ Waveshare 7.3" e-Paper HAT (E) — Spectra 6, 800x480, 6 fixed colors
 (black, white, yellow, red, blue, green).
 
 It polls Odoo's JSON-RPC API every 5 minutes but only spends a physical
-refresh cycle on the panel when the activity list actually changed, or
-once a day for a mandatory health refresh. Spectra 6 panels have no
-partial-refresh mode, so minimizing wear means minimizing *refreshes*,
+refresh cycle on the panel when the activity list actually changed, on
+the first poll after local midnight (so the date and deadline colours
+roll over), or once a day for a mandatory health refresh. Spectra 6
+panels have no partial-refresh mode, so minimizing wear means minimizing *refreshes*,
 not minimizing pixels touched. Everything runs from a single async main
 task with static buffers; TLS, rendering, and the network stack are all
 fully heapless.
@@ -417,7 +418,9 @@ hardware, harmless):
   `uid`), the firmware polls Odoo's JSON-RPC API every
   `POLL_INTERVAL_S` seconds (default 300 = 5 minutes).
 - The panel is refreshed only when the fetched activity snapshot
-  actually changed, or at least once per 24 hours, and never less than
+  actually changed, or on the first poll after local midnight (the
+  banner date, overdue deadlines and day counters depend on it), or at
+  least once per 24 hours, and never less than
   3 minutes after the previous refresh — otherwise the display is left
   untouched and the panel takes zero wear.
 - Three consecutive failed polls count as a state change: the firmware
